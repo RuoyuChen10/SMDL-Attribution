@@ -37,7 +37,7 @@ nb_forward = 400
 
 attribute_threshold = 0.5
 
-mt = "VGGFace2"
+mt = "VGGFace2-test"
 
 if mt == "VGGFace2":
     # VGGFace2
@@ -58,6 +58,44 @@ if mt == "VGGFace2":
     from models_onnx.Attr_CelebA import AttributeModel
     save_dir = "motivation/results/VGGFace2/Attribute"
     mkdir(save_dir)
+
+    attribute_set = [
+        'male', 'female', 
+        'young', 'old',
+        'arched_eyebrows', 'bushy_eyebrows',
+        'mouth_slightly_open', 'big_lips',
+        'big_nose', 'pointy_nose',
+        'bags_under_eyes', 'narrow_eyes'
+    ]
+
+    def interpolate(img, size):
+        if type(size) == tuple:
+            assert size[0] == size[1]
+            size = size[0]
+
+        orig_size = img.size(3)
+        if size < orig_size:
+            mode = 'area'
+        else:
+            mode = 'bilinear'
+        return F.interpolate(img, (size, size), mode=mode)
+
+    def prepare_image(path):
+        img = Image.open(path).convert('RGB')
+        img = TF.to_tensor(img)
+        img = img.unsqueeze(0)
+        if img.size(-1) != 224:
+            img = interpolate(img, 224)
+        img = img.permute(0, 2, 3, 1)
+        return img[0].numpy()
+
+elif mt == "VGGFace2-test":
+    model_path = "ckpt/AttributeNet-CelebA.onnx"
+    from models_onnx.Attr_CelebA import AttributeModel
+    save_dir = "motivation/results/VGGFace2-test/Attribute"
+    mkdir(save_dir)
+
+    ID_path = [os.path.join("motivation/images/VGGFace2/Attribute/VGGFace2-test", name) for name in os.listdir("motivation/images/VGGFace2/Attribute/VGGFace2-test")]
 
     attribute_set = [
         'male', 'female', 
@@ -142,6 +180,8 @@ def main():
                                       perturbation_function = 'inpainting',
                                       batch_size = 32)
 
+    
+
     for id_person in ID_path:
         # Image list
         image_names = os.listdir(id_person)
@@ -159,7 +199,7 @@ def main():
         # json file
         Json_file = {}
 
-        for image_name in image_names:
+        for image_name in image_names[:10]:
             sub_json = {}
             # image path
             image_path = os.path.join(id_person, image_name)

@@ -4,24 +4,16 @@ import os
 import numpy as np
 import cv2
 
-import tensorflow as tf
-from scipy.ndimage import gaussian_filter
 from matplotlib import pyplot as plt
 plt.style.use('seaborn')
-import tensorflow_probability as tfp
 
-import xplique
 from xplique.attributions import *
 from xplique.metrics import *
 
 from xplique_addons import *
 from utils import *
 
-from explanation.face_interpret import FaceHsicAttributionMethod
 from models_onnx.ID_NET import ONNX_Face_Recognition
-
-import onnx_tf.backend
-import onnx
 
 import numpy as np
 from PIL import Image

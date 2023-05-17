@@ -4,14 +4,10 @@ import os
 import numpy as np
 import cv2
 
-import tensorflow as tf
-import subprocess
 from scipy.ndimage import gaussian_filter
 from matplotlib import pyplot as plt
 plt.style.use('seaborn')
 from matplotlib.colors import ListedColormap
-
-import tensorflow_probability as tfp
 
 
 def load_image(path, size=224):
@@ -111,3 +107,14 @@ def gen_cam(image, mask):
     # merge heatmap to original image
     cam = 0.5 * heatmap + 0.5 * image
     return norm_image(cam), heatmap
+
+def norm(image):
+    """
+    :param image: [H,W,C]
+    :return:
+    """
+    image = image.copy()
+    image -= np.max(np.min(image), 0)
+    image /= np.max(image)
+    return image
+

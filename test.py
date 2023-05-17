@@ -22,37 +22,41 @@ from utils import *
 
 red_tr    = get_alpha_cmap('Reds')
 
-batch_size = 32
+from models.submodular import SubModular
 
-images_classes = [
-                  ('assets/fox.png', 278),
-                  ('assets/leopard.png', 288),
-                  ('assets/polar_bear.png', 296),
-                  ('assets/snow_fox.png', 279),
-]
+# batch_size = 32
 
-X_raw = np.array([load_image(p) for p, y in images_classes])
-Y_true = np.array([y for p, y in images_classes])
+# images_classes = [
+#                   ('assets/fox.png', 278),
+#                   ('assets/leopard.png', 288),
+#                   ('assets/polar_bear.png', 296),
+#                   ('assets/snow_fox.png', 279),
+# ]
 
-
-model = tf.keras.applications.ResNet50V2()
-model.layers[-1].activation = tf.keras.activations.linear
-inputs =  tf.keras.applications.resnet_v2.preprocess_input(np.array([x.copy() for x in X_raw], copy=True))  # 4*224*224*3
-
-labels = np.argmax(model.predict(inputs, batch_size=batch_size), axis=-1)
-labels_ohe = tf.one_hot(labels, 1000)
-
-grid_size = 7
-nb_forward = 1536
+# X_raw = np.array([load_image(p) for p, y in images_classes])
+# Y_true = np.array([y for p, y in images_classes])
 
 
-hsic_explainer = HsicAttributionMethod(model, 
-                                      grid_size = grid_size, 
-                                      nb_design = nb_forward , 
-                                      sampler = HsicLHSSampler(binary=True), 
-                                      estimator = HsicEstimator(kernel_type="binary"),
-                                      perturbation_function = 'inpainting',
-                                      batch_size = 256)
+# model = tf.keras.applications.ResNet50V2()
+# model.layers[-1].activation = tf.keras.activations.linear
+# inputs =  tf.keras.applications.resnet_v2.preprocess_input(np.array([x.copy() for x in X_raw], copy=True))  # 4*224*224*3
 
-explanations = hsic_explainer(inputs, labels_ohe)
-explanations = np.array(explanations)   # shape (4, 224, 224)
+# labels = np.argmax(model.predict(inputs, batch_size=batch_size), axis=-1)
+# labels_ohe = tf.one_hot(labels, 1000)
+
+# grid_size = 7
+# nb_forward = 1536
+
+
+# hsic_explainer = HsicAttributionMethod(model, 
+#                                       grid_size = grid_size, 
+#                                       nb_design = nb_forward , 
+#                                       sampler = HsicLHSSampler(binary=True), 
+#                                       estimator = HsicEstimator(kernel_type="binary"),
+#                                       perturbation_function = 'inpainting',
+#                                       batch_size = 256)
+
+# explanations = hsic_explainer(inputs, labels_ohe)
+# explanations = np.array(explanations)   # shape (4, 224, 224)
+
+x = SubModular()

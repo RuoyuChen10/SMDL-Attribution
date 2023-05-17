@@ -39,94 +39,6 @@ attribute_threshold = 0.5
 
 mt = "VGGFace2-all"
 
-if mt == "VGGFace2":
-    # VGGFace2
-    ID_path = [
-        'motivation/images/VGGFace2/ID/n000307',
-        'motivation/images/VGGFace2/ID/n000309',
-        'motivation/images/VGGFace2/ID/n000337',
-        'motivation/images/VGGFace2/ID/n000353',
-        'motivation/images/VGGFace2/ID/n000359',
-        'motivation/images/VGGFace2/ID/n003021',
-        'motivation/images/VGGFace2/ID/n003197',
-        'motivation/images/VGGFace2/ID/n005546',
-        'motivation/images/VGGFace2/ID/n006579',
-        'motivation/images/VGGFace2/ID/n006634',
-    ]
-
-    model_path = "ckpt/AttributeNet-CelebA.onnx"
-    from models_onnx.Attr_CelebA import AttributeModel
-    save_dir = "motivation/results/VGGFace2/Attribute"
-    mkdir(save_dir)
-
-    attribute_set = [
-        'male', 'female', 
-        'young', 'old',
-        'arched_eyebrows', 'bushy_eyebrows',
-        'mouth_slightly_open', 'big_lips',
-        'big_nose', 'pointy_nose',
-        'bags_under_eyes', 'narrow_eyes'
-    ]
-
-    def interpolate(img, size):
-        if type(size) == tuple:
-            assert size[0] == size[1]
-            size = size[0]
-
-        orig_size = img.size(3)
-        if size < orig_size:
-            mode = 'area'
-        else:
-            mode = 'bilinear'
-        return F.interpolate(img, (size, size), mode=mode)
-
-    def prepare_image(path):
-        img = Image.open(path).convert('RGB')
-        img = TF.to_tensor(img)
-        img = img.unsqueeze(0)
-        if img.size(-1) != 224:
-            img = interpolate(img, 224)
-        img = img.permute(0, 2, 3, 1)
-        return img[0].numpy()
-
-elif mt == "VGGFace2-test":
-    model_path = "ckpt/AttributeNet-CelebA.onnx"
-    from models_onnx.Attr_CelebA import AttributeModel
-    save_dir = "motivation/results/VGGFace2-test/Attribute"
-    mkdir(save_dir)
-
-    ID_path = [os.path.join("motivation/images/VGGFace2/Attribute/VGGFace2-test", name) for name in os.listdir("motivation/images/VGGFace2/Attribute/VGGFace2-test")]
-
-    attribute_set = [
-        'male', 'female', 
-        'young', 'old',
-        'arched_eyebrows', 'bushy_eyebrows',
-        'mouth_slightly_open', 'big_lips',
-        'big_nose', 'pointy_nose',
-        'bags_under_eyes', 'narrow_eyes'
-    ]
-
-    def interpolate(img, size):
-        if type(size) == tuple:
-            assert size[0] == size[1]
-            size = size[0]
-
-        orig_size = img.size(3)
-        if size < orig_size:
-            mode = 'area'
-        else:
-            mode = 'bilinear'
-        return F.interpolate(img, (size, size), mode=mode)
-
-    def prepare_image(path):
-        img = Image.open(path).convert('RGB')
-        img = TF.to_tensor(img)
-        img = img.unsqueeze(0)
-        if img.size(-1) != 224:
-            img = interpolate(img, 224)
-        img = img.permute(0, 2, 3, 1)
-        return img[0].numpy()
-
 if mt == "VGGFace2-all":
     # VGGFace2, all the attribute (40)
     ID_path = [
@@ -143,7 +55,7 @@ if mt == "VGGFace2-all":
     ]
 
     model_path = "ckpt/AttributeNet-CelebA-all.onnx"
-    from models_onnx.Attr_CelebA import AttributeModel
+    from models_onnx.Attr_CelebA_all import AttributeModel
     save_dir = "motivation/results/VGGFace2-all/Attribute"
     mkdir(save_dir)
 
@@ -179,47 +91,6 @@ if mt == "VGGFace2-all":
         img = img.permute(0, 2, 3, 1)
         return img[0].numpy()
 
-elif mt == "CelebA":
-    # Celeb-A
-    ID_path = [
-        'motivation/images/Celeb-A/ID/32',
-        'motivation/images/Celeb-A/ID/45',
-        'motivation/images/Celeb-A/ID/137', 
-        'motivation/images/Celeb-A/ID/207',
-        'motivation/images/Celeb-A/ID/241', 
-        'motivation/images/Celeb-A/ID/325', 
-        'motivation/images/Celeb-A/ID/423', 
-        'motivation/images/Celeb-A/ID/535', 
-        'motivation/images/Celeb-A/ID/620', 
-        'motivation/images/Celeb-A/ID/768', 
-        'motivation/images/Celeb-A/ID/824', 
-        'motivation/images/Celeb-A/ID/922', 
-    ]
-    model_path = "ckpt/AttributeNet-VGGFace2.onnx"
-    from models_onnx.Attr_VGG import AttributeModel
-    save_dir = "motivation/results/Celeb-A/Attribute"
-    mkdir(save_dir)
-
-    attribute_set = ["Male", "Female", 
-                     "Young", "Middle Aged", "Senior", 
-                     "Asian", "White", "Black", 
-                     "Brown Eyes","Bags Under Eyes",
-                     "Bushy Eyebrows","Arched Eyebrows", 
-                     "Big Lips",
-                     "Big Nose","Pointy Nose"]
-
-    def prepare_image(path):
-        mean_bgr = np.array([91.4953, 103.8827, 131.0912])
-        image = cv2.imread(path)
-        assert image is not None
-        image = cv2.resize(image,(224,224))
-        image = image.astype(np.float32)
-        image -= mean_bgr
-        # H * W * C   -->   C * H * W
-        # image = image.transpose(2,0,1)
-        # image = np.array([image])
-        return image
-
 def main():
     tf_model = AttributeModel(model_path)
     tf_model.set_idx_list(attribute_set)
@@ -231,8 +102,6 @@ def main():
                                       estimator = HsicEstimator(kernel_type="binary"),
                                       perturbation_function = 'inpainting',
                                       batch_size = 32)
-
-    
 
     for id_person in ID_path:
         # Image list
@@ -257,29 +126,21 @@ def main():
             image_path = os.path.join(id_person, image_name)
             
             # prepare image
-            X_raw = np.array([prepare_image(image_path)])
-            
-            # The predicted attribute
-            predict = tf_model(X_raw, True)[0]
-            predict = (predict > attribute_threshold).astype(int)
-
-            labels = np.argwhere(predict==1).flatten()
+            X_raw = np.array([prepare_image(image_path) for i in attribute_set])
+            labels = np.array([i for i in range(len(attribute_set))])
             labels_ohe = tf.one_hot(labels, len(attribute_set))
             
-            attr = np.array(tf_model.facial_attribute)[labels]
-            
-            sub_json["attribute"] = attr.tolist()
+            sub_json["attribute"] = attribute_set
             
             # HSIC Attribution Map
-            Input = np.array([prepare_image(image_path) for i in attr])
-            explanations = hsic_explainer(Input, labels_ohe)
+            explanations = hsic_explainer(X_raw, labels_ohe)
             explanations = np.array(explanations)
 
             np.save(os.path.join(explanation_save_dir, image_name.replace(".jpg", "")), explanations)
 
             Json_file[image_name] = sub_json
 
-            for idx, attr_ in enumerate(attr):
+            for idx, attr_ in enumerate(attribute_set):
                 attr_image_save_dir = os.path.join(visualization_save_dir, attr_)
                 mkdir(attr_image_save_dir)
 

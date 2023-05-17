@@ -64,8 +64,6 @@ if mt == "VGGFace2":
         'bags_under_eyes', 'narrow_eyes'
     ]
 
-    
-
 elif mt == "VGGFace2-test":
     Attribute_results_path = "motivation/results/VGGFace2-test/Attribute"
     Attribute_image_path = "motivation/images/VGGFace2/Attribute/VGGFace2-test"

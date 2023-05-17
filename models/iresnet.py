@@ -122,6 +122,8 @@ class IResNet(nn.Module):
             for m in self.modules():
                 if isinstance(m, IBasicBlock):
                     nn.init.constant_(m.bn2.weight, 0)
+                    
+        self.s = 64
 
     def _make_layer(self, block, planes, blocks, stride=1, dilate=False):
         downsample = None
@@ -149,7 +151,7 @@ class IResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x):
+    def forward(self, x, remove_head = False, mode = "arcface"):
         with torch.cuda.amp.autocast(self.fp16):
             x = self.conv1(x)
             x = self.bn1(x)
@@ -163,8 +165,15 @@ class IResNet(nn.Module):
             x = self.dropout(x)
         x = self.fc(x.float() if self.fp16 else x)
         x = self.features(x)
-
+        if remove_head:
+            return x
+        
         cosine = torch.nn.functional.linear(torch.nn.functional.normalize(x), torch.nn.functional.normalize(self.weight))
+
+        # arcface
+        if mode == "arcface":
+            cosine.acos_()
+            cosine.cos_().mul_(self.s)
 
         return cosine
 

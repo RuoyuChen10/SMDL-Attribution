@@ -5,58 +5,117 @@ import scipy
 import os
 import numpy as np
 import cv2
-
-import tensorflow as tf
+    
+# import tensorflow as tf
 import subprocess
 from scipy.ndimage import gaussian_filter
 from matplotlib import pyplot as plt
 plt.style.use('seaborn')
-import tensorflow_probability as tfp
+# import tensorflow_probability as tfp
 
-import xplique
-from xplique.attributions import *
-from xplique.metrics import *
+# import xplique
+# from xplique.attributions import *
+# from xplique.metrics import *
 
-from xplique_addons import *
+# from xplique_addons import *
 from utils import *
 
 red_tr    = get_alpha_cmap('Reds')
 
-from models.submodular import SubModular
+from models.submodular import FaceSubModularExplanation
 
-# batch_size = 32
+import torchvision.transforms as transforms
 
-# images_classes = [
-#                   ('assets/fox.png', 278),
-#                   ('assets/leopard.png', 288),
-#                   ('assets/polar_bear.png', 296),
-#                   ('assets/snow_fox.png', 279),
-# ]
+mt = "VGGFace2"
 
-# X_raw = np.array([load_image(p) for p, y in images_classes])
-# Y_true = np.array([y for p, y in images_classes])
+if mt == "VGGFace2":
+    ID_results_path = "motivation/results/VGGFace2/ID"
+    ID_image_path = "motivation/images/VGGFace2/ID"
+    ID_names = [
+        ('n000307', 290),
+        ('n000309', 292),
+        ('n000337', 320),
+        ('n000353', 336),
+        ('n000359', 342),
+        ('n003021', 2816),
+        ('n003197', 2984),
+        ('n005546', 5144),
+        ('n006579', 6103),
+        ('n006634', 6156),
+    ]
+    id_person2id = {
+        'n000307': 290,
+        'n000309': 292,
+        'n000337': 320,
+        'n000353': 336,
+        'n000359': 342,
+        'n003021': 2816,
+        'n003197': 2984,
+        'n005546': 5144,
+        'n006579': 6103,
+        'n006634': 6156
+    }
+    
+    # ID model
+    model_path = "ckpt/ArcFace-VGGFace2-R50-8631.onnx"
+    class_num = 8631
+    
+    # submodular parameters
+    batch_size = 400    # RTX 3090: 450
+    
+    combination_number_k = 5
 
+    transforms = transforms.Compose([
+        transforms.Resize((112,112)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))
+    ])
+    
+    vis_topk = 20
+    interval = 0.01
 
-# model = tf.keras.applications.ResNet50V2()
-# model.layers[-1].activation = tf.keras.activations.linear
-# inputs =  tf.keras.applications.resnet_v2.preprocess_input(np.array([x.copy() for x in X_raw], copy=True))  # 4*224*224*3
+smdl = FaceSubModularExplanation()
 
-# labels = np.argmax(model.predict(inputs, batch_size=batch_size), axis=-1)
-# labels_ohe = tf.one_hot(labels, 1000)
+id_peoples = os.listdir(ID_image_path)
 
-# grid_size = 7
-# nb_forward = 1536
+for id_person in id_peoples:
+    if ".py" in id_person:
+        continue
+    
+    gt_label = id_person2id[id_person]
+        
+    id_person_path = os.path.join(ID_results_path, id_person)
+    
+    # load image names
+    image_txt = os.path.join(id_person_path, "image.txt")
+    with open(image_txt, "r") as f:
+        image_names = f.read().split('\n')
+        while "" in image_names:
+            image_names.remove("")
+            
+    # load masks
+    explanation_masks = np.load(
+        os.path.join(id_person_path, "explanation.npy")
+    )
+    
+    # Loop image names
+    for i, image_name in enumerate(image_names):
+        image_path = os.path.join(os.path.join(ID_image_path, id_person), image_name)
+        print(image_path)
+        image = cv2.imread(image_path)
+        
+        mask = norm(explanation_masks[i])[:, :, np.newaxis]
 
+        mask_images = []
+        components_image_list = []
+        
+        for erasing_threshold in (np.arange(0, 1, interval) + interval):
+            masked_image = image * (mask < erasing_threshold).astype(int) * (mask > erasing_threshold-interval).astype(int)
+            mask_images.append(masked_image.astype(np.uint8))
+            
+            components_image_list.append(masked_image.astype(np.uint8))
 
-# hsic_explainer = HsicAttributionMethod(model, 
-#                                       grid_size = grid_size, 
-#                                       nb_design = nb_forward , 
-#                                       sampler = HsicLHSSampler(binary=True), 
-#                                       estimator = HsicEstimator(kernel_type="binary"),
-#                                       perturbation_function = 'inpainting',
-#                                       batch_size = 256)
-
-# explanations = hsic_explainer(inputs, labels_ohe)
-# explanations = np.array(explanations)   # shape (4, 224, 224)
-
-x = SubModular()
+        smdl(components_image_list)
+        
+        break
+    break

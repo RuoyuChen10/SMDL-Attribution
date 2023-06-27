@@ -151,7 +151,7 @@ class IResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def forward(self, x, remove_head = False, mode = "arcface"):
+    def forward(self, x, remove_head = True, mode = "arcface"):
         with torch.cuda.amp.autocast(self.fp16):
             x = self.conv1(x)
             x = self.bn1(x)

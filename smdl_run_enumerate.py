@@ -19,7 +19,7 @@ import math
 
 from mtcnn.src import detect_faces
 from utils import *
-from models.submodular import SubModular
+from models.submodular_enumerate import SubModular
 
 import torchvision.transforms.functional as TF
 import torch.nn.functional as F

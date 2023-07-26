@@ -7,7 +7,7 @@ Created on 2023/6/28
 """
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 import numpy as np
 import cv2
@@ -29,7 +29,7 @@ from utils import *
 SAVE_PATH = "explanation_results/"
 mkdir(SAVE_PATH)
 
-mode = "Celeb-A"
+mode = "VGGFace2"
 
 if mode == "Celeb-A":
     keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-Celeb-A.h5"
@@ -38,6 +38,15 @@ if mode == "Celeb-A":
     class_number = 10177
     batch = 256
     SAVE_PATH = os.path.join(SAVE_PATH, "celeba")
+    mkdir(SAVE_PATH)
+
+elif mode == "VGGFace2":
+    keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-VGGFace2.h5"
+    dataset_path = "datasets/VGGFace2/test"
+    dataset_index = "datasets/VGGFace2/test.txt"
+    class_number = 8631
+    batch = 2048
+    SAVE_PATH = os.path.join(SAVE_PATH, "vggface2")
     mkdir(SAVE_PATH)
 
 def load_image(path, size=112):
@@ -50,7 +59,7 @@ def main():
     model = load_model(keras_model_path)
     
     model.layers[-1].activation = tf.keras.activations.linear
-    batch_size = 2048
+    batch_size = 4096
     
     # define explainers
     explainers = [
@@ -63,8 +72,8 @@ def main():
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
         # GradCAM(model),
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
-        Rise(model, nb_samples=500, batch_size=batch_size),
-        SobolAttributionMethod(model, batch_size=batch_size),
+        # Rise(model, nb_samples=500, batch_size=batch_size),
+        # SobolAttributionMethod(model, batch_size=batch_size),
         HsicAttributionMethod(model, batch_size=batch_size),
         Lime(model, nb_samples = 1000),
         KernelShap(model, nb_samples = 1000)
@@ -92,6 +101,13 @@ def main():
         
         for step in tqdm(range(total_steps), desc=explainer_method_name):
             image_names = input_data[step * batch : step * batch + batch]
+
+            if os.path.exists(
+                os.path.join(exp_save_path, image_names[0].replace(".jpg", ".npy"))
+            ):
+                print(1)
+                continue
+
             X_raw = np.array([load_image(os.path.join(dataset_path, image_name)) for image_name in image_names])
             
             Y_true = np.array(label[step * batch : step * batch + batch])

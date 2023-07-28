@@ -53,7 +53,7 @@ class FaceSubModularExplanation(object):
         self.ltl_log_ep = 5
         
         self.lambda1 = 1
-        self.lambda2 = 5
+        self.lambda2 = 3
         self.lambda3 = 1
         
         self.transforms = transforms.Compose([

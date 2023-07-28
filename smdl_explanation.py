@@ -106,7 +106,7 @@ def partition_by_mulit_grad(image, explanation_mask, grad_size = 28, grad_num_pe
     Divide the image into grad_size x grad_size areas, divide according to eplanation_mask, each division has grad_num_per_set grads.
     """
     partition_number = int(grad_size * grad_size / grad_num_per_set)
-    pixel_length_per_grad = int(image.shape[0] / grad_size)
+    # pixel_length_per_grad = int(image.shape[0] / grad_size)
 
     components_image_list = []
     pool_z = cv2.resize(explanation_mask, (grad_size, grad_size))

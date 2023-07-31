@@ -124,6 +124,7 @@ def partition_by_mulit_grad(image, explanation_mask, grad_size = 28, grad_num_pe
         components_image_list.append(
             (image * binary_mask[:, :, np.newaxis]).astype(np.uint8)
         )
+        
     return components_image_list
 
 def Partition_by_patch(image, partition_size=10):

@@ -53,14 +53,16 @@ class FaceSubModularExplanation(object):
         self.ltl_log_ep = 5
         
         self.lambda1 = 1
-        self.lambda2 = 3
-        self.lambda3 = 1
+        self.lambda2 = 1
+        self.lambda3 = 2
         
         self.transforms = transforms.Compose([
             transforms.Resize((112,112)),
             transforms.ToTensor(),
             transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))
         ])
+
+        self.softmax = torch.nn.Softmax(dim=1)
 
     def convert_prepare_image(self, image, size=112):
         img = cv2.resize(image, (size, size))
@@ -168,11 +170,11 @@ class FaceSubModularExplanation(object):
             consine_dist = torch.arccos(consine_similarity) / math.pi
             
             if consine_dist.shape[0] == 1:
-                r_scores = torch.min(consine_dist * (1 - torch.eye(norm_feature.shape[0]).to(self.device)), -1)[0].min()
+                r_scores = torch.min(consine_dist * (1 - torch.eye(norm_feature.shape[0]).to(self.device)), -1)[0].sum()
             else:
                 r_scores = torch.min(
                     consine_dist + torch.eye(norm_feature.shape[0]).to(self.device),
-                    -1)[0].min()
+                    -1)[0].sum()    # fixed bug
 
         return r_scores # tensor(0.0343, device='cuda:0')
     
@@ -201,7 +203,7 @@ class FaceSubModularExplanation(object):
                 mean_feature = F.normalize(source_face_feature, p=2, dim=1)
 
             consine_similarity = torch.mm(norm_feature, mean_feature.t())
-            consine_dist = 1 - torch.arccos(consine_similarity) / math.pi   # Bug need revision
+            consine_dist = 1 - torch.arccos(consine_similarity) / math.pi   # Is distance, not similarity! no need 1-. Bug need revision
 
             mc_score = consine_dist.reshape(-1)
             # mc_score = consine_similarity.reshape(-1)
@@ -278,7 +280,8 @@ class FaceSubModularExplanation(object):
             # Compute mean closeness score / 计算与原始人脸的相似度 (越相似越好吧)
             face_feature = self.face_recognition_model(batch_input_images, remove_head = True)
             mc = self.compute_mean_closeness_score(face_feature, self.source_feature)
-            # mc = self.face_recognition_model(batch_input_images, remove_head = False)[:, self.target_label]
+            
+            recognition_score = self.softmax(self.face_recognition_model(batch_input_images, remove_head = False))[:, self.target_label]
             
         smdl_score = self.lambda1 * confidence + self.lambda2 * r +  self.lambda3 * mc
         
@@ -295,12 +298,14 @@ class FaceSubModularExplanation(object):
         #           )
         
         # if smdl_score.max() > self.smdl_score_best:
-        self.smdl_score_best = smdl_score.max()
+            # self.smdl_score_best = smdl_score.max()
         arg_max_index = smdl_score.argmax()
     
         self.saved_json_file["confidence_score"].append(confidence[arg_max_index].cpu().item())
         self.saved_json_file["redundancy_score"].append(r[arg_max_index].cpu().item())
         self.saved_json_file["verification_score"].append(mc[arg_max_index].cpu().item())
+        self.saved_json_file["smdl_score"].append(smdl_score[arg_max_index].cpu().item())
+        self.saved_json_file["recognition_score"].append(recognition_score[arg_max_index].cpu().item())
 
         return sub_index_sets[arg_max_index]    # sub_index_sets is [main_set, new_candidate]
     
@@ -339,6 +344,8 @@ class FaceSubModularExplanation(object):
         self.saved_json_file["confidence_score"] = []
         self.saved_json_file["redundancy_score"] = []
         self.saved_json_file["verification_score"] = []
+        self.saved_json_file["smdl_score"] = []
+        self.saved_json_file["recognition_score"] = []
         self.saved_json_file["lambda1"] = self.lambda1
         self.saved_json_file["lambda2"] = self.lambda2
         self.saved_json_file["lambda3"] = self.lambda3
@@ -367,8 +374,10 @@ class FaceSubModularExplanation(object):
         submodular_image_set = Subset_merge[Submodular_Subset]  # sub_k x (112, 112, 3)
         
         submodular_image = submodular_image_set.sum(0).astype(np.uint8)
-        # cv2.imwrite("results.jpg", submodular_image)
-        # print("saved")
+
+        self.saved_json_file["smdl_score_max"] = max(self.saved_json_file["smdl_score"])
+        self.saved_json_file["smdl_score_max_index"] = self.saved_json_file["smdl_score"].index(self.saved_json_file["smdl_score_max"])
+        
         return submodular_image, submodular_image_set, self.saved_json_file
 
 class FaceSubModularExplanation_v1(object):

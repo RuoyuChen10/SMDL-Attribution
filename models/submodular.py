@@ -30,7 +30,10 @@ class FaceSubModularExplanation(object):
     def __init__(self, 
                  cfg_path="models/submodular_cfg.json",
                  n = 2,
-                 k = 40):
+                 k = 40,
+                 lambda1 = 1.0,
+                 lambda2 = 1.0,
+                 lambda3 = 1.0):
         super(FaceSubModularExplanation, self).__init__()
         
         # Load face model configuration / 导入人脸识别模型的配置文件
@@ -52,9 +55,9 @@ class FaceSubModularExplanation(object):
         # Parameter of the LtLG algorithm / LtLG贪婪算法的参数
         self.ltl_log_ep = 5
         
-        self.lambda1 = 1
-        self.lambda2 = 1
-        self.lambda3 = 2
+        self.lambda1 = lambda1
+        self.lambda2 = lambda2
+        self.lambda3 = lambda3
         
         self.transforms = transforms.Compose([
             transforms.Resize((112,112)),

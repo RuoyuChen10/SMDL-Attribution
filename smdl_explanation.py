@@ -43,6 +43,18 @@ def parse_args():
                         default="grad",
                         choices=["grad", "pixel"],
                         help="")
+    parser.add_argument('--pixel-partition-number',
+                        type=int,
+                        default=112,
+                        help="")
+    parser.add_argument('--grad-partition-size',
+                        type=int,
+                        default=28,
+                        help="")
+    parser.add_argument('--grad-number-per-set',
+                        type=int,
+                        default=8,
+                        help="")
     parser.add_argument('--random-patch',
                         type=bool,
                         default=False,
@@ -56,6 +68,15 @@ def parse_args():
                         help='')
     parser.add_argument('--sub-k', 
                         type=int, default=40,
+                        help='')
+    parser.add_argument('--lambda1', 
+                        type=float, default=1.,
+                        help='')
+    parser.add_argument('--lambda2', 
+                        type=float, default=1.,
+                        help='')
+    parser.add_argument('--lambda3', 
+                        type=float, default=1.,
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, default='./submodular_results/celeba',
@@ -141,7 +162,7 @@ def Partition_by_patch(image, partition_size=10):
 
 def main(args):
     
-    smdl = FaceSubModularExplanation(n=args.sub_n, k=args.sub_k)
+    smdl = FaceSubModularExplanation(n=args.sub_n, k=args.sub_k, lambda1=args.lambda1, lambda2=args.lambda2, lambda3=args.lambda3)
     
     with open(args.eval_list, "r") as f:
         infos = f.read().split('\n')
@@ -150,7 +171,12 @@ def main(args):
     if args.random_patch:
         save_dir = os.path.join(args.save_dir, "random_patch" + "-" + str(args.sub_k))
     else:
-        save_dir = os.path.join(args.save_dir, args.explanation_method.split("/")[-1] + "-" + str(args.sub_k))
+        if args.partition == "pixel":
+            save_dir = os.path.join(args.save_dir, args.partition + "-set_num_{}".format(args.pixel_partition_number))
+        elif args.partition == "grad":
+            save_dir = os.path.join(args.save_dir, args.partition + "-{}x{}".format(args.grad_partition_size, args.grad_partition_size))
+        mkdir(save_dir)
+        save_dir = os.path.join(save_dir, args.explanation_method.split("/")[-1] + "-" + str(args.sub_k) + "-{}-{}-{}".format(args.lambda1, args.lambda2, args.lambda3))
     mkdir(save_dir)
     
     for info in tqdm(infos):
@@ -176,9 +202,9 @@ def main(args):
             components_image_list = Partition_by_patch(image)
         else:
             if args.partition == "pixel":
-                components_image_list = Partition_image(image, mask)
+                components_image_list = Partition_image(image, mask, args.pixel_partition_number)
             elif args.partition == "grad":
-                components_image_list = partition_by_mulit_grad(image, mask)
+                components_image_list = partition_by_mulit_grad(image, mask, args.grad_partition_size, args.grad_number_per_set)
 
         submodular_image, submodular_image_set, saved_json_file = smdl(components_image_list)
         

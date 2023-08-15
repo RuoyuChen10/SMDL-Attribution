@@ -59,6 +59,9 @@ def parse_args():
                         type=bool,
                         default=False,
                         help="")
+    parser.add_argument('--random-patch-number', 
+                        type=int, default=28,
+                        help='')
     parser.add_argument('--explanation-method', 
                         type=str, 
                         default='./explanation_results/celeba/HsicAttributionMethod',
@@ -169,7 +172,7 @@ def main(args):
     
     mkdir(args.save_dir)
     if args.random_patch:
-        save_dir = os.path.join(args.save_dir, "random_patch" + "-" + str(args.sub_k))
+        save_dir = os.path.join(args.save_dir, "random_patch-{}x{}".format(args.random_patch_number, args.random_patch_number) + "-" + str(args.sub_k))
     else:
         if args.partition == "pixel":
             save_dir = os.path.join(args.save_dir, args.partition + "-set_num_{}".format(args.pixel_partition_number))

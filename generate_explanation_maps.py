@@ -7,7 +7,7 @@ Created on 2023/6/28
 """
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 import numpy as np
 import cv2
@@ -43,7 +43,7 @@ if mode == "Celeb-A":
 elif mode == "VGGFace2":
     keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-VGGFace2.h5"
     dataset_path = "datasets/VGGFace2/test"
-    dataset_index = "datasets/VGGFace2/test.txt"
+    dataset_index = "datasets/VGGFace2/eval.txt"
     class_number = 8631
     batch = 2048
     SAVE_PATH = os.path.join(SAVE_PATH, "vggface2")
@@ -59,7 +59,7 @@ def main():
     model = load_model(keras_model_path)
     
     model.layers[-1].activation = tf.keras.activations.linear
-    batch_size = 4096
+    batch_size = 256
     
     # define explainers
     explainers = [
@@ -74,9 +74,9 @@ def main():
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
         # Rise(model, nb_samples=500, batch_size=batch_size),
         # SobolAttributionMethod(model, batch_size=batch_size),
-        HsicAttributionMethod(model, batch_size=batch_size),
-        Lime(model, nb_samples = 1000),
-        KernelShap(model, nb_samples = 1000)
+        HsicAttributionMethod(model, batch_size=batch_size, grid_size=7),
+        # Lime(model, nb_samples = 1000),
+        # KernelShap(model, nb_samples = 1000)
     ]
     
     # data preproccess

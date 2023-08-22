@@ -16,7 +16,6 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import cv2
 from PIL import Image
-
 import torchvision.transforms as transforms
 
 from itertools import combinations
@@ -25,6 +24,10 @@ from collections import OrderedDict
 from .iresnet import iresnet50
 from .iresnet_edl import iresnet100
 from .evidential import relu_evidence, exp_evidence
+
+import tensorflow_addons as tfa
+from keras.models import load_model
+from insight_face_models import *
 
 class FaceSubModularExplanation(object):
     def __init__(self, 
@@ -41,13 +44,21 @@ class FaceSubModularExplanation(object):
             self.cfg = json.load(f)
         
         self.device = torch.device(self.cfg["device"])
+        self.moda = self.cfg["mode"]
+            
+        self.transforms = transforms.Compose([
+            transforms.Resize((112,112)),
+            transforms.ToTensor(),
+            transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))
+        ])
+
         # Uncertainty estimation model / 不确定性估计模型
         self.uncertainty_model = self.define_uncertrainty_network(
             self.cfg["uncertainty_model"]["num_classes"], self.cfg["uncertainty_model"]["model_path"])
         # Face recognition
         self.face_recognition_model = self.define_recognition_model(
             self.cfg["face_recognition_model"]["num_classes"], self.cfg["face_recognition_model"]["model_path"])
-        
+
         # Parameters of the submodular / submodular的超参数
         self.n = n  # the number of the partitions / 图像元素集被划分的数量
         self.k = k
@@ -58,19 +69,21 @@ class FaceSubModularExplanation(object):
         self.lambda1 = lambda1
         self.lambda2 = lambda2
         self.lambda3 = lambda3
-        
-        self.transforms = transforms.Compose([
-            transforms.Resize((112,112)),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5,0.5,0.5),(0.5,0.5,0.5))
-        ])
 
-        self.softmax = torch.nn.Softmax(dim=1)
+        if self.moda == "Torch":
+            self.softmax = torch.nn.Softmax(dim=1)
+        elif self.moda == "TF":
+            self.softmax = tf.keras.layers.Softmax(axis=-1)
 
-    def convert_prepare_image(self, image, size=112):
-        img = cv2.resize(image, (size, size))
-        img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-        img = self.transforms(img).numpy()
+    def convert_prepare_image(self, image, size=112, moda="Torch"):
+        if moda == "Torch":
+            img = cv2.resize(image, (size, size))
+            img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            img = self.transforms(img).numpy()
+        elif moda == "TF":
+            img = cv2.resize(image[...,::-1], (size, size))
+            img = (img - 127.5) * 0.0078125
+            img = img.astype(np.float32)
         # img = img.transpose(1, 2, 0)
         return img
 
@@ -78,35 +91,41 @@ class FaceSubModularExplanation(object):
         """
         init the face recognition model
         """
-        model = iresnet50(num_classes)
+        if self.moda == "Torch":
+            model = iresnet50(num_classes)
 
-        if pretrained_path is not None and os.path.exists(pretrained_path):
-            model_dict = model.state_dict()
-            pretrained_param = torch.load(pretrained_path)
+            if pretrained_path is not None and os.path.exists(pretrained_path):
+                model_dict = model.state_dict()
+                pretrained_param = torch.load(pretrained_path)
 
-            try:
-                pretrained_param = pretrained_param.state_dict()
-            except:
-                pass
-                
-            new_state_dict = OrderedDict()
-            for k, v in pretrained_param.items():
-                if k in model_dict:
-                    new_state_dict[k] = v
-                    # print("Load parameter {}".format(k))
-                elif k[7:] in model_dict:
-                    new_state_dict[k[7:]] = v
-                    # print("Load parameter {}".format(k[7:]))
-                else:
-                    print("Parameter {} has not been load".format(k))
-            model_dict.update(new_state_dict)
-            model.load_state_dict(model_dict)
-            print("Success load pre-trained face recognition model {}".format(pretrained_path))
-        else:
-            print("not load pretrained")
+                try:
+                    pretrained_param = pretrained_param.state_dict()
+                except:
+                    pass
+                    
+                new_state_dict = OrderedDict()
+                for k, v in pretrained_param.items():
+                    if k in model_dict:
+                        new_state_dict[k] = v
+                        # print("Load parameter {}".format(k))
+                    elif k[7:] in model_dict:
+                        new_state_dict[k[7:]] = v
+                        # print("Load parameter {}".format(k[7:]))
+                    else:
+                        print("Parameter {} has not been load".format(k))
+                model_dict.update(new_state_dict)
+                model.load_state_dict(model_dict)
+                print("Success load pre-trained face recognition model {}".format(pretrained_path))
+            else:
+                print("not load pretrained")
+            
+            model.eval()
+            model.to(self.device)
         
-        model.eval()
-        model.to(self.device)
+        elif self.moda == "TF":
+            self.model_base = load_model(pretrained_path)
+            model = tf.keras.models.Model(inputs=self.model_base.input, outputs=self.model_base.get_layer("embedding").output)
+            print("Success load pre-trained face recognition model {}".format(pretrained_path))
 
         return model
 
@@ -256,7 +275,7 @@ class FaceSubModularExplanation(object):
         # merge images / 组合图像
         sub_images = np.array([
             self.convert_prepare_image(
-                self.merge_image(sub_index_set, partition_image_set)
+                self.merge_image(sub_index_set, partition_image_set), moda="Torch"  # Uncertainty model is pytorch version
             ) for sub_index_set in sub_index_sets])
         batch_input_images = torch.from_numpy(sub_images).type(torch.float32).to(self.device)
         
@@ -270,22 +289,41 @@ class FaceSubModularExplanation(object):
             # Compute redudancy score / 计算累赘分数
             partition_image_features = np.array([
                 self.convert_prepare_image(
-                    partition_image
+                    partition_image, moda=self.moda
                 ) for partition_image in partition_image_set
             ])
-            partition_image_features = self.face_recognition_model(
-                torch.from_numpy(partition_image_features).type(torch.float32).to(self.device),
-                remove_head = True
-            )
-            # print(partition_image_features.shape, sub_index_sets)
+
+            if self.moda == "Torch":
+                partition_image_features = self.face_recognition_model(
+                    torch.from_numpy(partition_image_features).type(torch.float32).to(self.device),
+                    remove_head = True
+                )
+            elif self.moda == "TF":
+                partition_image_features = self.face_recognition_model(
+                    partition_image_features
+                )
+                partition_image_features = torch.from_numpy(partition_image_features.numpy()).to(self.device)
+            
             r = self.proccess_compute_repudancy_score(partition_image_features, sub_index_sets)
             
             # Compute mean closeness score / 计算与原始人脸的相似度 (越相似越好吧)
-            face_feature = self.face_recognition_model(batch_input_images, remove_head = True)
+            if self.moda == "Torch":
+                face_feature = self.face_recognition_model(batch_input_images, remove_head = True)
+            elif self.moda == "TF":
+                batch_input_images = np.array([
+                    self.convert_prepare_image(
+                        self.merge_image(sub_index_set, partition_image_set), moda=self.moda  # Uncertainty model is pytorch version
+                    ) for sub_index_set in sub_index_sets])
+                face_feature = self.face_recognition_model(batch_input_images)
+                face_feature = torch.from_numpy(face_feature.numpy()).to(self.device)
+            
             mc = self.compute_mean_closeness_score(face_feature, self.source_feature)
             
-            recognition_score = self.softmax(self.face_recognition_model(batch_input_images, remove_head = False))[:, self.target_label]
-            
+            if self.moda == "Torch":
+                recognition_score = self.softmax(self.face_recognition_model(batch_input_images, remove_head = False))[:, self.target_label].cpu().item()
+            elif self.moda == "TF":
+                recognition_score = self.softmax(self.model_base(batch_input_images))[:, self.target_label].numpy().tolist()
+
         smdl_score = self.lambda1 * confidence + self.lambda2 * r +  self.lambda3 * mc
         
         if not monotonically_increasing:
@@ -302,13 +340,13 @@ class FaceSubModularExplanation(object):
         
         # if smdl_score.max() > self.smdl_score_best:
             # self.smdl_score_best = smdl_score.max()
-        arg_max_index = smdl_score.argmax()
+        arg_max_index = smdl_score.argmax().cpu().item()
     
         self.saved_json_file["confidence_score"].append(confidence[arg_max_index].cpu().item())
         self.saved_json_file["redundancy_score"].append(r[arg_max_index].cpu().item())
         self.saved_json_file["verification_score"].append(mc[arg_max_index].cpu().item())
         self.saved_json_file["smdl_score"].append(smdl_score[arg_max_index].cpu().item())
-        self.saved_json_file["recognition_score"].append(recognition_score[arg_max_index].cpu().item())
+        self.saved_json_file["recognition_score"].append(recognition_score[arg_max_index])
 
         return sub_index_sets[arg_max_index]    # sub_index_sets is [main_set, new_candidate]
     
@@ -355,13 +393,21 @@ class FaceSubModularExplanation(object):
         self.saved_json_file["lambda3"] = self.lambda3
         
         source_image = self.convert_prepare_image(
-            np.array(image_set).sum(0).astype(np.uint8))
-        self.source_feature = self.face_recognition_model(
-            torch.from_numpy(source_image).unsqueeze(0).to(self.device), 
-            remove_head = True)
+                np.array(image_set).sum(0).astype(np.uint8), moda = self.moda)
         
-        self.target_label = self.face_recognition_model(torch.from_numpy(source_image).unsqueeze(0).to(self.device), remove_head = False).argmax().item()
+        if self.moda == "Torch":
+            self.source_feature = self.face_recognition_model(
+                torch.from_numpy(source_image).unsqueeze(0).to(self.device), 
+                remove_head = True)
         
+            self.target_label = self.face_recognition_model(torch.from_numpy(source_image).unsqueeze(0).to(self.device), remove_head = False).argmax().item()
+        elif self.moda == "TF":
+            self.source_feature = self.face_recognition_model(np.array([source_image]))
+            self.source_feature = torch.from_numpy(
+                self.source_feature.numpy()).to(self.device)
+            predict = self.model_base(np.array([source_image]))
+            self.target_label = predict.numpy().argmax()
+
         if self.n != 1:
             Subset_merge = []
             for partition in V_partition:

@@ -84,6 +84,10 @@ def parse_args():
     parser.add_argument('--lambda3', 
                         type=float, default=1.,
                         help='')
+    parser.add_argument('--cfg', 
+                        type=str, 
+                        default="models/submodular_cfg_vgg_tf.json",
+                        help='')
     parser.add_argument('--save-dir', 
                         type=str, default='./submodular_results/vggface2',
                         help='output directory to save results')
@@ -168,7 +172,7 @@ def Partition_by_patch(image, partition_size=10):
 
 def main(args):
     
-    smdl = FaceSubModularExplanation(n=args.sub_n, k=args.sub_k, lambda1=args.lambda1, lambda2=args.lambda2, lambda3=args.lambda3)
+    smdl = FaceSubModularExplanation(cfg_path=args.cfg, n=args.sub_n, k=args.sub_k, lambda1=args.lambda1, lambda2=args.lambda2, lambda3=args.lambda3)
     
     with open(args.eval_list, "r") as f:
         infos = f.read().split('\n')

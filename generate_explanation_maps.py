@@ -26,10 +26,13 @@ from xplique.attributions import (Saliency, GradientInput, IntegratedGradients, 
 from insight_face_models import *
 from utils import *
 
+from keras.applications.resnet import (
+    ResNet50, ResNet101, preprocess_input, decode_predictions)
+
 SAVE_PATH = "explanation_results/"
 mkdir(SAVE_PATH)
 
-mode = "VGGFace2"
+mode = "CUB"
 
 if mode == "Celeb-A":
     keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-Celeb-A.h5"
@@ -37,6 +40,7 @@ if mode == "Celeb-A":
     dataset_index = "datasets/celeb-a/test.txt"
     class_number = 10177
     batch = 256
+    img_size = 112
     SAVE_PATH = os.path.join(SAVE_PATH, "celeba")
     mkdir(SAVE_PATH)
 
@@ -46,13 +50,28 @@ elif mode == "VGGFace2":
     dataset_index = "datasets/VGGFace2/eval.txt"
     class_number = 8631
     batch = 2048
+    img_size = 112
     SAVE_PATH = os.path.join(SAVE_PATH, "vggface2")
     mkdir(SAVE_PATH)
 
-def load_image(path, size=112):
-    img = cv2.resize(cv2.imread(path)[...,::-1], (size, size))
-    img = (img - 127.5) * 0.0078125
-    return img.astype(np.float32)
+elif mode == "CUB":
+    keras_model_path = "ckpt/keras_model/cub-resnet101.h5"
+    dataset_path = "datasets/CUB/test"
+    dataset_index = "datasets/CUB/eval.txt"
+    class_number = 200
+    batch = 1024
+    img_size = 224
+    SAVE_PATH = os.path.join(SAVE_PATH, "cub")
+    mkdir(SAVE_PATH)
+
+def load_image(path):
+    img = cv2.resize(cv2.imread(path)[...,::-1], (img_size, img_size))
+    if mode == "VGGFace2" or mode == "Celeb-A":
+        img = (img - 127.5) * 0.0078125
+        return img.astype(np.float32)
+    elif mode == "CUB":
+        img = preprocess_input(np.array(img))
+        return img
 
 def main():
     # Load model
@@ -72,9 +91,9 @@ def main():
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
         # GradCAM(model),
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
-        # Rise(model, nb_samples=500, batch_size=batch_size),
+        # Rise(model, nb_samples=500, batch_size=batch_size, grid_size=10),
         # SobolAttributionMethod(model, batch_size=batch_size),
-        HsicAttributionMethod(model, batch_size=batch_size, grid_size=7),
+        HsicAttributionMethod(model, batch_size=batch_size, grid_size=10),
         # Lime(model, nb_samples = 1000),
         # KernelShap(model, nb_samples = 1000)
     ]
@@ -107,7 +126,7 @@ def main():
             ):
                 print(1)
                 continue
-
+            
             X_raw = np.array([load_image(os.path.join(dataset_path, image_name)) for image_name in image_names])
             
             Y_true = np.array(label[step * batch : step * batch + batch])

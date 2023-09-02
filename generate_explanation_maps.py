@@ -55,13 +55,23 @@ elif mode == "VGGFace2":
     mkdir(SAVE_PATH)
 
 elif mode == "CUB":
-    keras_model_path = "ckpt/keras_model/cub-resnet101.h5"
+    keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
     dataset_path = "datasets/CUB/test"
     dataset_index = "datasets/CUB/eval.txt"
     class_number = 200
-    batch = 1024
+    batch = 100
     img_size = 224
     SAVE_PATH = os.path.join(SAVE_PATH, "cub")
+    mkdir(SAVE_PATH)
+
+elif mode == "CUB-CROP":
+    keras_model_path = "ckpt/keras_model/cub-resnet101-crop.h5"
+    dataset_path = "datasets/CUB/test_crop"
+    dataset_index = "datasets/CUB/eval_crop_random.txt"
+    class_number = 200
+    batch = 100
+    img_size = 224
+    SAVE_PATH = os.path.join(SAVE_PATH, "cub_crop")
     mkdir(SAVE_PATH)
 
 def load_image(path):
@@ -69,15 +79,14 @@ def load_image(path):
     if mode == "VGGFace2" or mode == "Celeb-A":
         img = (img - 127.5) * 0.0078125
         return img.astype(np.float32)
-    elif mode == "CUB":
+    elif mode == "CUB" or mode == "CUB-CROP":
         img = preprocess_input(np.array(img))
         return img
 
 def main():
     # Load model
     model = load_model(keras_model_path)
-    
-    model.layers[-1].activation = tf.keras.activations.linear
+    # model.layers[-1].activation = tf.keras.activations.linear
     batch_size = 256
     
     # define explainers
@@ -89,13 +98,13 @@ def main():
         # SmoothGrad(model, nb_samples=80, batch_size=batch_size),
         # SquareGrad(model, nb_samples=80, batch_size=batch_size),
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
-        # GradCAM(model),
+        GradCAM(model),
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
-        # Rise(model, nb_samples=500, batch_size=batch_size, grid_size=10),
+        # Rise(model, nb_samples=500, batch_size=batch_size),
         # SobolAttributionMethod(model, batch_size=batch_size),
-        HsicAttributionMethod(model, batch_size=batch_size, grid_size=10),
+        # HsicAttributionMethod(model, batch_size=batch_size),
         # Lime(model, nb_samples = 1000),
-        # KernelShap(model, nb_samples = 1000)
+        # KernelShap(model, nb_samples = 1000, batch_size=32)
     ]
     
     # data preproccess
@@ -128,7 +137,6 @@ def main():
                 continue
             
             X_raw = np.array([load_image(os.path.join(dataset_path, image_name)) for image_name in image_names])
-            
             Y_true = np.array(label[step * batch : step * batch + batch])
             labels_ohe = tf.one_hot(Y_true, class_number)
             

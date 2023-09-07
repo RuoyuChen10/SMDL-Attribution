@@ -36,7 +36,8 @@ class FaceSubModularExplanation(object):
                  k = 40,
                  lambda1 = 1.0,
                  lambda2 = 1.0,
-                 lambda3 = 1.0):
+                 lambda3 = 1.0,
+                 lambda4 = 1.0):
         super(FaceSubModularExplanation, self).__init__()
         
         # Load face model configuration / 导入人脸识别模型的配置文件
@@ -69,6 +70,7 @@ class FaceSubModularExplanation(object):
         self.lambda1 = lambda1
         self.lambda2 = lambda2
         self.lambda3 = lambda3
+        self.lambda4 = lambda4
 
         if self.moda == "Torch":
             self.softmax = torch.nn.Softmax(dim=1)
@@ -314,17 +316,27 @@ class FaceSubModularExplanation(object):
                     self.convert_prepare_image(
                         self.merge_image(sub_index_set, partition_image_set), moda=self.moda  # Uncertainty model is pytorch version
                     ) for sub_index_set in sub_index_sets])
+                
+                batch_input_images_reverse = np.array([
+                    self.convert_prepare_image(
+                        self.org_img - self.merge_image(sub_index_set, partition_image_set), moda=self.moda  # Uncertainty model is pytorch version
+                    ) for sub_index_set in sub_index_sets])
+                
                 face_feature = self.face_recognition_model(batch_input_images)
                 face_feature = torch.from_numpy(face_feature.numpy()).to(self.device)
             
+                face_feature_deletion = self.face_recognition_model(batch_input_images_reverse)
+                face_feature_deletion = torch.from_numpy(face_feature_deletion.numpy()).to(self.device)
+                
             mc = self.compute_mean_closeness_score(face_feature, self.source_feature)
+            mc_reverse = 1 - self.compute_mean_closeness_score(face_feature_deletion, self.source_feature)
             
             if self.moda == "Torch":
                 recognition_score = self.softmax(self.face_recognition_model(batch_input_images, remove_head = False))[:, self.target_label].cpu().item()
             elif self.moda == "TF":
                 recognition_score = self.softmax(self.model_base(batch_input_images))[:, self.target_label].numpy().tolist()
 
-        smdl_score = self.lambda1 * confidence + self.lambda2 * r +  self.lambda3 * mc
+        smdl_score = self.lambda1 * confidence + self.lambda2 * r +  self.lambda3 * mc + self.lambda4 * mc_reverse
         
         if not monotonically_increasing:
             arg_max_index = smdl_score.argmax()
@@ -345,6 +357,7 @@ class FaceSubModularExplanation(object):
         self.saved_json_file["confidence_score"].append(confidence[arg_max_index].cpu().item())
         self.saved_json_file["redundancy_score"].append(r[arg_max_index].cpu().item())
         self.saved_json_file["verification_score"].append(mc[arg_max_index].cpu().item())
+        self.saved_json_file["deletion_score"].append(mc_reverse[arg_max_index].cpu().item())
         self.saved_json_file["smdl_score"].append(smdl_score[arg_max_index].cpu().item())
         self.saved_json_file["recognition_score"].append(recognition_score[arg_max_index])
 
@@ -386,12 +399,15 @@ class FaceSubModularExplanation(object):
         self.saved_json_file["confidence_score"] = []
         self.saved_json_file["redundancy_score"] = []
         self.saved_json_file["verification_score"] = []
+        self.saved_json_file["deletion_score"] = []
         self.saved_json_file["smdl_score"] = []
         self.saved_json_file["recognition_score"] = []
         self.saved_json_file["lambda1"] = self.lambda1
         self.saved_json_file["lambda2"] = self.lambda2
         self.saved_json_file["lambda3"] = self.lambda3
+        self.saved_json_file["lambda4"] = self.lambda4
         
+        self.org_img = np.array(image_set).sum(0).astype(np.uint8)
         source_image = self.convert_prepare_image(
                 np.array(image_set).sum(0).astype(np.uint8), moda = self.moda)
         

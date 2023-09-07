@@ -8,13 +8,12 @@ from keras.applications.resnet import (
 
 import imageio
 
-image_path = "datasets/CUB/test/117/House_Sparrow_0096_111519.jpg"
-hsic_mask_path = "explanation_results/cub/HsicAttributionMethod-8x8/117/House_Sparrow_0096_111519.npy"
-ours_mask_path = "submodular_results/cub/grad-10x10-4/HsicAttributionMethod-8x8-24-1.0-1.0-1.0-1.0/npy/117/House_Sparrow_0096_111519.npy"
-class_index = 117
-steps = 25
-
-
+method = "GradCAMPP"
+image_path = "datasets/CUB/test/139/Summer_Tanager_0101_139441.jpg"
+hsic_mask_path = "explanation_results/cub/{}/139/Summer_Tanager_0101_139441.npy".format(method)
+ours_mask_path = "submodular_results/cub/grad-10x10-2/{}-49-1.0-1.0-1.0-1.0/npy/139/Summer_Tanager_0101_139441.npy".format(method)
+class_index = 139
+steps = 50
 
 keras_model_path = "ckpt/keras_model/cub-resnet101.h5"
 model = load_model(keras_model_path)
@@ -96,7 +95,7 @@ def main():
         ax1.xaxis.set_visible(False)
         ax1.yaxis.set_visible(False)
         ax1.imshow(insertion_explanation_images[i][...,::-1])
-        ax1.set_title('Hsic Attribution Method', fontsize=32)
+        ax1.set_title(method, fontsize=32)
 
         ax2.spines["left"].set_visible(False)
         ax2.spines["right"].set_visible(False)

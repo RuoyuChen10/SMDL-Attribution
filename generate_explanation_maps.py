@@ -32,7 +32,7 @@ from keras.applications.resnet import (
 SAVE_PATH = "explanation_results/"
 mkdir(SAVE_PATH)
 
-mode = "CUB"
+mode = "CUB-FAIR"
 
 if mode == "Celeb-A":
     keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-Celeb-A.h5"
@@ -64,6 +64,16 @@ elif mode == "CUB":
     SAVE_PATH = os.path.join(SAVE_PATH, "cub")
     mkdir(SAVE_PATH)
 
+elif mode == "CUB-FAIR":
+    keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+    dataset_path = "datasets/CUB/test"
+    dataset_index = "datasets/CUB/eval_fair.txt"
+    class_number = 200
+    batch = 100
+    img_size = 224
+    SAVE_PATH = os.path.join(SAVE_PATH, "cub")
+    mkdir(SAVE_PATH)
+
 elif mode == "CUB-CROP":
     keras_model_path = "ckpt/keras_model/cub-resnet101-crop.h5"
     dataset_path = "datasets/CUB/test_crop"
@@ -79,7 +89,7 @@ def load_image(path):
     if mode == "VGGFace2" or mode == "Celeb-A":
         img = (img - 127.5) * 0.0078125
         return img.astype(np.float32)
-    elif mode == "CUB" or mode == "CUB-CROP":
+    elif mode == "CUB" or mode == "CUB-CROP" or mode == "CUB-FAIR":
         img = preprocess_input(np.array(img))
         return img
 
@@ -130,14 +140,14 @@ def main():
         
         for step in tqdm(range(total_steps), desc=explainer_method_name):
             image_names = input_data[step * batch : step * batch + batch]
-
+            
             if os.path.exists(
                 os.path.join(exp_save_path, image_names[0].replace(".jpg", ".npy"))
             ):
                 print(1)
                 continue
-            
             X_raw = np.array([load_image(os.path.join(dataset_path, image_name)) for image_name in image_names])
+
             Y_true = np.array(label[step * batch : step * batch + batch])
             labels_ohe = tf.one_hot(Y_true, class_number)
             

@@ -279,38 +279,54 @@ class FaceSubModularExplanation(object):
             self.convert_prepare_image(
                 self.merge_image(sub_index_set, partition_image_set), moda="Torch"  # Uncertainty model is pytorch version
             ) for sub_index_set in sub_index_sets])
+        
         batch_input_images = torch.from_numpy(sub_images).type(torch.float32).to(self.device)
         
         with torch.no_grad():
-            # Compute uncertainty / 计算不确定性
-            u = self.compute_uncertainty(
-                batch_input_images
-            )
-            confidence = 1 - u
+            if self.lambda1 == 0:
+                confidence = 0
+            else:
+                # Compute uncertainty / 计算不确定性
+                u = self.compute_uncertainty(
+                    batch_input_images
+                )
+                confidence = 1 - u
             
-            # Compute redudancy score / 计算累赘分数
-            partition_image_features = np.array([
-                self.convert_prepare_image(
-                    partition_image, moda=self.moda
-                ) for partition_image in partition_image_set
-            ])
+            if self.lambda2 == 0:
+                r = 0
+            else:
+                # Compute redudancy score / 计算累赘分数
+                partition_image_features = np.array([
+                    self.convert_prepare_image(
+                        partition_image, moda=self.moda
+                    ) for partition_image in partition_image_set
+                ])
 
-            if self.moda == "Torch":
-                partition_image_features = self.face_recognition_model(
-                    torch.from_numpy(partition_image_features).type(torch.float32).to(self.device),
-                    remove_head = True
-                )
-            elif self.moda == "TF":
-                partition_image_features = self.face_recognition_model(
-                    partition_image_features
-                )
-                partition_image_features = torch.from_numpy(partition_image_features.numpy()).to(self.device)
-            
-            r = self.proccess_compute_repudancy_score(partition_image_features, sub_index_sets)
+                if self.moda == "Torch":
+                    partition_image_features = self.face_recognition_model(
+                        torch.from_numpy(partition_image_features).type(torch.float32).to(self.device),
+                        remove_head = True
+                    )
+                elif self.moda == "TF":
+                    partition_image_features = self.face_recognition_model(
+                        partition_image_features
+                    )
+                    partition_image_features = torch.from_numpy(partition_image_features.numpy()).to(self.device)
+                
+                r = self.proccess_compute_repudancy_score(partition_image_features, sub_index_sets)
             
             # Compute mean closeness score / 计算与原始人脸的相似度 (越相似越好吧)
             if self.moda == "Torch":
                 face_feature = self.face_recognition_model(batch_input_images, remove_head = True)
+
+                sub_images_reverse = np.array([
+                    self.convert_prepare_image(
+                        self.org_img - self.merge_image(sub_index_set, partition_image_set), moda="Torch"  # Uncertainty model is pytorch version
+                    ) for sub_index_set in sub_index_sets])
+                batch_input_images_reverse = torch.from_numpy(sub_images_reverse).type(torch.float32).to(self.device)
+
+                face_feature_deletion = self.face_recognition_model(batch_input_images_reverse, remove_head = True)
+
             elif self.moda == "TF":
                 batch_input_images = np.array([
                     self.convert_prepare_image(
@@ -327,12 +343,19 @@ class FaceSubModularExplanation(object):
             
                 face_feature_deletion = self.face_recognition_model(batch_input_images_reverse)
                 face_feature_deletion = torch.from_numpy(face_feature_deletion.numpy()).to(self.device)
-                
-            mc = self.compute_mean_closeness_score(face_feature, self.source_feature)
-            mc_reverse = 1 - self.compute_mean_closeness_score(face_feature_deletion, self.source_feature)
+
+            if self.lambda3 == 0:
+                mc = 0
+            else:    
+                mc = self.compute_mean_closeness_score(face_feature, self.source_feature)
+            
+            if self.lambda4 == 0:
+                mc_reverse = 0
+            else:
+                mc_reverse = 1 - self.compute_mean_closeness_score(face_feature_deletion, self.source_feature)
             
             if self.moda == "Torch":
-                recognition_score = self.softmax(self.face_recognition_model(batch_input_images, remove_head = False))[:, self.target_label].cpu().item()
+                recognition_score = self.softmax(self.face_recognition_model(batch_input_images, remove_head = False))[:, self.target_label].cpu().numpy().tolist()
             elif self.moda == "TF":
                 recognition_score = self.softmax(self.model_base(batch_input_images))[:, self.target_label].numpy().tolist()
 
@@ -353,11 +376,14 @@ class FaceSubModularExplanation(object):
         # if smdl_score.max() > self.smdl_score_best:
             # self.smdl_score_best = smdl_score.max()
         arg_max_index = smdl_score.argmax().cpu().item()
-    
-        self.saved_json_file["confidence_score"].append(confidence[arg_max_index].cpu().item())
-        self.saved_json_file["redundancy_score"].append(r[arg_max_index].cpu().item())
-        self.saved_json_file["verification_score"].append(mc[arg_max_index].cpu().item())
-        self.saved_json_file["deletion_score"].append(mc_reverse[arg_max_index].cpu().item())
+        if self.lambda1 != 0:
+            self.saved_json_file["confidence_score"].append(confidence[arg_max_index].cpu().item())
+        if self.lambda2 != 0:
+            self.saved_json_file["redundancy_score"].append(r[arg_max_index].cpu().item())
+        if self.lambda3 != 0:
+            self.saved_json_file["verification_score"].append(mc[arg_max_index].cpu().item())
+        if self.lambda4 != 0:
+            self.saved_json_file["deletion_score"].append(mc_reverse[arg_max_index].cpu().item())
         self.saved_json_file["smdl_score"].append(smdl_score[arg_max_index].cpu().item())
         self.saved_json_file["recognition_score"].append(recognition_score[arg_max_index])
 

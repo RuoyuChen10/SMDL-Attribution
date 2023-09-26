@@ -37,7 +37,7 @@ def parse_args():
                         help='Datasets.')
     parser.add_argument('--eval-list',
                         type=str,
-                        default='datasets/CUB/eval_random.txt',
+                        default='datasets/CUB/eval_fair.txt',
                         help='Datasets.')
     parser.add_argument('--partition',
                         type=str,
@@ -90,7 +90,7 @@ def parse_args():
                         default="models/submodular_cfg_cub_tf.json",
                         help='')
     parser.add_argument('--save-dir', 
-                        type=str, default='./submodular_results/cub',
+                        type=str, default='./submodular_results/cub-fair',
                         help='output directory to save results')
     args = parser.parse_args()
     return args
@@ -219,7 +219,7 @@ def main(args):
             elif args.partition == "grad":
                 components_image_list = partition_by_mulit_grad(image, mask, args.grad_partition_size, args.grad_number_per_set)
 
-        submodular_image, submodular_image_set, saved_json_file = smdl(components_image_list)
+        submodular_image, submodular_image_set, saved_json_file = smdl(components_image_list, int(id_people))
         
         # Save the final image
         save_image_root_path = os.path.join(save_dir, "image-{}".format(args.sub_k))

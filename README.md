@@ -1,4 +1,4 @@
-# HSIC-Face-Explanation
+# Minimal Interpretable Region Discovery via Submodular Subset Selection for Image Recognition
 
 ![Python 3.8](https://img.shields.io/badge/python-3.8-green.svg?style=plastic)
 ![Pytorch 1.12.1](https://img.shields.io/badge/pytorch-1.12.1-green.svg?style=plastic)

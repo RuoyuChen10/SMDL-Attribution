@@ -1,0 +1,13 @@
+{
+    "uncertainty_model": {
+        "model_path": "ckpt/pytorch_model/edl-101-10177.pth",
+        "num_classes": 10177
+    },
+    "face_recognition_model":{
+        "model_path": "ckpt/keras_model/keras-ArcFace-R100-Celeb-A.h5",
+        "num_classes": 10177
+    },
+    "redundancy_distance_metric": "cosine",
+    "device": "cuda:1",
+    "mode": "TF"
+}

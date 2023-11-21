@@ -13,12 +13,12 @@ matplotlib.get_cachedir()
 plt.rc('font', family="Times New Roman")
 # method = "GradCAMPP"
 # method_name = "GradCAM++"
-method = "HsicAttributionMethod-8x8"
+method = "HsicAttributionMethod"
 method_name = "HSIC-Attribution"
-image_path = "datasets/CUB/test/65/Western_Gull_0143_54909.jpg"
-hsic_mask_path = "explanation_results/cub/{}/65/Western_Gull_0143_54909.npy".format(method)
-ours_mask_path = "submodular_results/cub-fair/grad-10x10-4/{}-24-1.0-1.0-20.0-1.0/npy/65/Western_Gull_0143_54909.npy".format(method)
-# ours_mask_path = "submodular_results/cub/grad-10x10-2/{}-49-1.0-1.0-1.0-1.0/npy/65/Western_Gull_0143_54909.npy".format(method)
+image_path = "datasets/CUB/test/4/Crested_Auklet_0059_794929.jpg"
+hsic_mask_path = "explanation_results/cub/{}/4/Crested_Auklet_0059_794929.npy".format(method)
+ours_mask_path = "submodular_results/cub/grad-10x10-4/{}-24-1.0-1.0-1.0-1.0/npy/4/Crested_Auklet_0059_794929.npy".format(method)
+# ours_mask_path = "submodular_results/cub/grad-10x10-2/{}-49-1.0-1.0-1.0-1.0/npy/4/Crested_Auklet_0059_794929.npy".format(method)
 class_index = int(image_path.split("/")[-2])
 steps = 25
 

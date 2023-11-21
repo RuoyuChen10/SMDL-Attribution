@@ -1,0 +1,13 @@
+{
+    "uncertainty_model": {
+        "model_path": "ckpt/pytorch_model/cub-resnet101-edl.pth",
+        "num_classes": 200
+    },
+    "recognition_model":{
+        "model_path": "ckpt/keras_model/cub-vgg19.h5",
+        "num_classes": 200
+    },
+    "redundancy_distance_metric": "cosine",
+    "device": "cuda:1",
+    "mode": "TF"
+}

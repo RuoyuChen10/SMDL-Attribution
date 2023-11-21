@@ -22,10 +22,6 @@ from torchvision import models
 from itertools import combinations
 from collections import OrderedDict
 
-from keras.applications.resnet import (
-    ResNet50, ResNet101, preprocess_input, decode_predictions)
-
-
 from .evidential import relu_evidence, exp_evidence
 
 import tensorflow_addons as tfa
@@ -80,14 +76,31 @@ class CubSubModularExplanation(object):
         elif self.moda == "TF":
             self.softmax = tf.keras.layers.Softmax(axis=-1)
 
+        if "resnet" in self.cfg["recognition_model"]["model_path"]:
+            from keras.applications.resnet import preprocess_input
+            self.preprocess_input = preprocess_input
+            self.tf_size = 224
+        elif "vgg19" in self.cfg["recognition_model"]["model_path"]:
+            from keras.applications.vgg19 import preprocess_input
+            self.preprocess_input = preprocess_input
+            self.tf_size = 224
+        elif "efficientnetv2" in self.cfg["recognition_model"]["model_path"]:
+            from keras.applications.efficientnet_v2 import preprocess_input
+            self.preprocess_input = preprocess_input
+            self.tf_size = 384
+        elif "mobilenetv2" in self.cfg["recognition_model"]["model_path"]:
+            from keras.applications.mobilenet_v2 import preprocess_input
+            self.preprocess_input = preprocess_input
+            self.tf_size = 224
+
     def convert_prepare_image(self, image, size=224, moda="Torch"):
         if moda == "Torch":
-            img = cv2.resize(image, (size, size))
-            img = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            # img = cv2.resize(image, (size, size))
+            img = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
             img = self.transforms(img).numpy()
         elif moda == "TF":
-            img = cv2.resize(image[...,::-1], (size, size))
-            img = preprocess_input(np.array(img))
+            img = cv2.resize(image[...,::-1], (self.tf_size, self.tf_size))
+            img = self.preprocess_input(np.array(img))
             # img = (img - 127.5) * 0.0078125
             # img = img.astype(np.float32)
         # img = img.transpose(1, 2, 0)
@@ -102,7 +115,9 @@ class CubSubModularExplanation(object):
         
         elif self.moda == "TF":
             self.model_base = load_model(pretrained_path)
-            model = tf.keras.models.Model(inputs=self.model_base.input, outputs=self.model_base.get_layer("dense").output)
+            layer_name = "dense"
+            # layer_name = "flatten"
+            model = tf.keras.models.Model(inputs=self.model_base.input, outputs=self.model_base.get_layer(layer_name).output)
             # model.layers[-1].activation = tf.keras.activations.linear
             print("Success load pre-trained bird recognition model {}".format(pretrained_path))
 

@@ -22,13 +22,15 @@ from tqdm import tqdm
 from insight_face_models import *
 from utils import *
 
-from keras.applications.resnet import (
-    ResNet50, ResNet101, preprocess_input, decode_predictions)
+# from keras.applications.resnet import (
+#     ResNet50, ResNet101, preprocess_input, decode_predictions)
+# from keras.applications.efficientnet_v2 import preprocess_input
 
 SAVE_PATH = "explanation_results/"
 mkdir(SAVE_PATH)
 
 mode = "CUB-FAIR"
+net_mode  = "vgg" # "resnet", vgg
 
 if mode == "Celeb-A":
     keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-Celeb-A.h5"
@@ -62,14 +64,37 @@ elif mode == "CUB":
     mkdir(SAVE_PATH)
 
 elif mode == "CUB-FAIR":
-    keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+    if net_mode == "resnet":
+        keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval_fair-resnet.txt"
+        layer_name = "conv5_block3_3_conv"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub")
+        from keras.applications.resnet import preprocess_input
+    elif net_mode == "efficientnet":
+        keras_model_path = "ckpt/keras_model/cub-efficientnetv2m.h5"
+        img_size = 384
+        dataset_index = "datasets/CUB/eval_fair-efficientnet.txt"
+        layer_name = "top_conv"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-efficientnet")
+        from keras.applications.efficientnet_v2 import preprocess_input
+    elif net_mode == "vgg":
+        keras_model_path = "ckpt/keras_model/cub-vgg19.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval_fair-vgg19.txt"
+        layer_name = "block5_conv4"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-vgg19")
+        from keras.applications.vgg19 import preprocess_input
+    elif net_mode == "mobilenetv2":
+        keras_model_path = "ckpt/keras_model/cub-mobilenetv2.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval_fair-mobilenetv2.txt"
+        layer_name = "Conv_1"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-mobilenetv2")
+        from keras.applications.mobilenet_v2 import preprocess_input
     dataset_path = "datasets/CUB/test"
-    dataset_index = "datasets/CUB/eval_fair.txt"
     class_number = 200
     batch = 100
-    img_size = 224
-    layer_name = "conv5_block3_3_conv"
-    SAVE_PATH = os.path.join(SAVE_PATH, "cub")
     mkdir(SAVE_PATH)
 
 def load_image(path):
@@ -116,7 +141,7 @@ class ScoreCAM(object):
         # 3. project highlighted area in the activation map to original input space by multiplying the normalized activation map
         masked_input_list = []
         for act_map_normalized in act_map_normalized_list:
-            masked_input = np.copy(image)
+            masked_input = np.copy(image).astype(np.float32)
             for k in range(3):
                 masked_input[0,:,:,k] *= act_map_normalized
             masked_input_list.append(masked_input)
@@ -135,6 +160,7 @@ class ScoreCAM(object):
 def main():
     # Load model
     model = load_model(keras_model_path)
+    print(model.summary())
     
     # define explainers
     explainer = ScoreCAM(model, layer_name)

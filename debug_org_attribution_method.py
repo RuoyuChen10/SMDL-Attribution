@@ -5,19 +5,24 @@ import matplotlib
 from matplotlib import pyplot as plt
 
 from keras.models import load_model
-from keras.applications.resnet import (
-    preprocess_input)
+# from keras.applications.resnet import (
+#     preprocess_input)
+# from keras.applications.efficientnet_v2 import preprocess_input
+# from keras.applications.mobilenet_v2 import preprocess_input
+from keras.applications.vgg19 import preprocess_input
 
 from tqdm import tqdm
 import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/cub/ScoreCAM"
+explanation_method = "explanation_results/cub-vgg19/ScoreCAM"
 image_root_path = "datasets/CUB/test/"
-keras_model_path = "ckpt/keras_model/cub-resnet101.h5"
-eval_list = "datasets/CUB/eval_fair.txt"
+keras_model_path = "ckpt/keras_model/cub-vgg19.h5"
+eval_list = "datasets/CUB/eval_fair-vgg19.txt"
+save_doc = "cub-fair-vgg19"
 steps = 25
+image_size_ = 224
 
 def perturbed(image, mask, rate = 0.5, mode = "insertion"):
     mask_flatten = mask.flatten()
@@ -41,7 +46,7 @@ def perturbed(image, mask, rate = 0.5, mode = "insertion"):
 
 def main():
     mkdir(results_save_root)
-    save_dir = os.path.join(results_save_root, "cub-fair")
+    save_dir = os.path.join(results_save_root, save_doc)
     mkdir(save_dir)
     save_dir = os.path.join(save_dir, explanation_method.split("/")[-1])
     mkdir(save_dir)
@@ -62,7 +67,7 @@ def main():
         mask_path = os.path.join(explanation_method, info.split(" ")[0].replace(".jpg", ".npy"))
 
         image = cv2.imread(image_path)
-        image = cv2.resize(image, (224,224))
+        image = cv2.resize(image, (image_size_, image_size_))
         explanation = np.load(mask_path)
 
         insertion_explanation_images = []

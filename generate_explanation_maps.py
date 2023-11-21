@@ -26,13 +26,11 @@ from xplique.attributions import (Saliency, GradientInput, IntegratedGradients, 
 from insight_face_models import *
 from utils import *
 
-from keras.applications.resnet import (
-    ResNet50, ResNet101, preprocess_input, decode_predictions)
-
 SAVE_PATH = "explanation_results/"
 mkdir(SAVE_PATH)
 
-mode = "CUB-FAIR"
+mode = "CUB"
+net_mode  = "mobilenetv2" # "resnet", vgg
 
 if mode == "Celeb-A":
     keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-Celeb-A.h5"
@@ -55,23 +53,53 @@ elif mode == "VGGFace2":
     mkdir(SAVE_PATH)
 
 elif mode == "CUB":
-    keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+    if net_mode == "resnet":
+        keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval-resnet.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-resnet")
+        from keras.applications.resnet import preprocess_input
+    elif net_mode == "mobilenetv2":
+        keras_model_path = "ckpt/keras_model/cub-mobilenetv2.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval-resnet.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-resnet")
+        from keras.applications.mobilenet_v2 import preprocess_input
     dataset_path = "datasets/CUB/test"
-    dataset_index = "datasets/CUB/eval.txt"
     class_number = 200
     batch = 100
-    img_size = 224
-    SAVE_PATH = os.path.join(SAVE_PATH, "cub")
+    
     mkdir(SAVE_PATH)
 
 elif mode == "CUB-FAIR":
-    keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+    if net_mode == "resnet":
+        keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval_fair-resnet.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-resnet")
+        from keras.applications.resnet import preprocess_input
+    elif net_mode == "efficientnet":
+        keras_model_path = "ckpt/keras_model/cub-efficientnetv2m.h5"
+        img_size = 384
+        dataset_index = "datasets/CUB/eval_fair-efficientnet.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-efficientnet")
+        from keras.applications.efficientnet_v2 import preprocess_input
+    elif net_mode == "vgg":
+        keras_model_path = "ckpt/keras_model/cub-vgg19.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval_fair-vgg19.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-vgg19")
+        from keras.applications.vgg19 import preprocess_input
+    elif net_mode == "mobilenetv2":
+        keras_model_path = "ckpt/keras_model/cub-mobilenetv2.h5"
+        img_size = 224
+        dataset_index = "datasets/CUB/eval_fair-mobilenetv2.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "cub-mobilenetv2")
+        from keras.applications.mobilenet_v2 import preprocess_input
+
     dataset_path = "datasets/CUB/test"
-    dataset_index = "datasets/CUB/eval_fair.txt"
     class_number = 200
     batch = 100
-    img_size = 224
-    SAVE_PATH = os.path.join(SAVE_PATH, "cub")
     mkdir(SAVE_PATH)
 
 elif mode == "CUB-CROP":
@@ -109,13 +137,13 @@ def main():
         # SquareGrad(model, nb_samples=80, batch_size=batch_size),
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
         # GradCAM(model),
-        GradCAMPP(model),
+        # GradCAMPP(model),
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
         # Rise(model, nb_samples=500, batch_size=batch_size),
         # SobolAttributionMethod(model, batch_size=batch_size),
         # HsicAttributionMethod(model, batch_size=batch_size),
-        # Lime(model, nb_samples = 1000),
-        # KernelShap(model, nb_samples = 1000, batch_size=32)
+        Lime(model, nb_samples = 1000),
+        KernelShap(model, nb_samples = 1000, batch_size=32)
     ]
     
     # data preproccess

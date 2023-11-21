@@ -23,6 +23,7 @@ plt.style.use('seaborn')
 
 from tqdm import tqdm
 from utils import *
+import time
 
 red_tr    = get_alpha_cmap('Reds')
 
@@ -87,7 +88,7 @@ def parse_args():
                         help='')
     parser.add_argument('--cfg', 
                         type=str, 
-                        default="models/submodular_cfg_cub_tf.json",
+                        default="models/submodular_cfg_cub_tf-resnet.json",
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, default='./submodular_results/cub',
@@ -219,7 +220,10 @@ def main(args):
             elif args.partition == "grad":
                 components_image_list = partition_by_mulit_grad(image, mask, args.grad_partition_size, args.grad_number_per_set)
 
+        start = time.time()
         submodular_image, submodular_image_set, saved_json_file = smdl(components_image_list)
+        end = time.time()
+        print('程序执行时间: ',end - start)
         
         # Save the final image
         save_image_root_path = os.path.join(save_dir, "image-{}".format(args.sub_k))

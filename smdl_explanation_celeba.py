@@ -14,6 +14,7 @@ import os
 import numpy as np
 import cv2
 import json
+import time
 
 import subprocess
 from scipy.ndimage import gaussian_filter
@@ -215,8 +216,12 @@ def main(args):
                 components_image_list = Partition_image(image, mask, args.pixel_partition_number)
             elif args.partition == "grad":
                 components_image_list = partition_by_mulit_grad(image, mask, args.grad_partition_size, args.grad_number_per_set)
-
+        
+        
+        T1 = time.perf_counter()
         submodular_image, submodular_image_set, saved_json_file = smdl(components_image_list)
+        T2 =time.perf_counter()
+        print((T2 - T1))
         
         # Save the final image
         save_image_root_path = os.path.join(save_dir, "image-{}".format(args.sub_k))

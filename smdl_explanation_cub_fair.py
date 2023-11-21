@@ -37,7 +37,7 @@ def parse_args():
                         help='Datasets.')
     parser.add_argument('--eval-list',
                         type=str,
-                        default='datasets/CUB/eval_fair.txt',
+                        default='datasets/CUB/eval_fair-resnet.txt',
                         help='Datasets.')
     parser.add_argument('--partition',
                         type=str,

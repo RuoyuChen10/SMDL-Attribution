@@ -11,12 +11,15 @@ import imageio
 
 matplotlib.get_cachedir()
 plt.rc('font', family="Times New Roman")
+# method = "GradCAMPP"
+# method_name = "GradCAM++"
 method = "HsicAttributionMethod-8x8"
 method_name = "HSIC-Attribution"
-image_path = "datasets/CUB/test/111/Great_Grey_Shrike_0060_797008.jpg"
-hsic_mask_path = "explanation_results/cub/{}/111/Great_Grey_Shrike_0060_797008.npy".format(method)
-ours_mask_path = "submodular_results/cub-fair/grad-10x10-4/{}-24-1.0-1.0-1.0-1.0/npy/111/Great_Grey_Shrike_0060_797008.npy".format(method)
-class_index = 111
+image_path = "datasets/CUB/test/65/Western_Gull_0143_54909.jpg"
+hsic_mask_path = "explanation_results/cub/{}/65/Western_Gull_0143_54909.npy".format(method)
+ours_mask_path = "submodular_results/cub-fair/grad-10x10-4/{}-24-1.0-1.0-20.0-1.0/npy/65/Western_Gull_0143_54909.npy".format(method)
+# ours_mask_path = "submodular_results/cub/grad-10x10-2/{}-49-1.0-1.0-1.0-1.0/npy/65/Western_Gull_0143_54909.npy".format(method)
+class_index = int(image_path.split("/")[-2])
 steps = 25
 
 
@@ -122,7 +125,7 @@ def main():
         ax1.xaxis.set_visible(False)
         ax1.yaxis.set_visible(False)
         ax1.imshow(insertion_explanation_images[i][...,::-1])
-        ax1.set_title(method_name, fontsize=32)
+        ax1.set_title(method_name, fontsize=54)
 
         ax2.spines["left"].set_visible(False)
         ax2.spines["right"].set_visible(False)
@@ -131,15 +134,15 @@ def main():
         ax2.xaxis.set_visible(False)
         ax2.yaxis.set_visible(False)
         ax2.imshow(insertion_ours_images[i][...,::-1])
-        ax2.set_title('+ Ours', fontsize=32)
+        ax2.set_title('+ Ours', fontsize=54)
 
         plt.xlim((0, 1))
         plt.ylim((0, 1))
-        plt.xticks(fontsize=26)
-        plt.yticks(fontsize=26)
-        plt.title('Insertion', fontsize=32)
-        plt.ylabel('Recognition Score', fontsize=28)
-        plt.xlabel('Percentage of image revealed', fontsize=28)
+        plt.xticks(fontsize=36)
+        plt.yticks(fontsize=36)
+        plt.title('Insertion', fontsize=54)
+        plt.ylabel('Recognition Score', fontsize=44)
+        plt.xlabel('Percentage of image revealed', fontsize=44)
 
         x_ = x[:i+1]
         explanation_y = insertion_explanation_images_input_results.numpy()[:i+1]
@@ -148,7 +151,7 @@ def main():
         ours_y = insertion_ours_images_input_results.numpy()[:i+1]
         plt.plot(x_, ours_y, color='dodgerblue', linewidth=3.5)  # 绘制曲线
 
-        plt.legend(['{}'.format(method_name), "+ Ours"], fontsize=24, loc="upper right")
+        plt.legend(['{}'.format(method_name), "+ Ours"], fontsize=40, loc="upper right")
         plt.scatter(x_[-1], explanation_y[-1], color='orange', s=54)  # 绘制最新点
         plt.scatter(x_[-1], ours_y[-1], color='dodgerblue', s=54)  # 绘制最新点
 
@@ -185,10 +188,11 @@ def main():
         plt.savefig("gif_tmp.png", bbox_inches='tight')
         img_frame = cv2.imread("gif_tmp.png")
         frames.append(img_frame.copy()[...,::-1])
-    
+    print("Highest confidence:{}, final confidence:{}".format(insertion_ours_images_input_results.numpy().max(), insertion_ours_images_input_results[-1]))
     for j in range(20):
         frames.append(img_frame.copy()[...,::-1])
     
     imageio.mimsave(image_path.split("/")[-1].replace(".jpg", ".gif"), frames, 'GIF', duration=0.1)  
+    
 
 main()

@@ -7,6 +7,14 @@
 
 ![](./image/abstract.gif)
 
+## Environment
+
+```python
+opencv-python
+opencv-contrib-python
+mtutils
+```
+
 ## 1. Generate saliency map
 
 First, the priori saliency maps for sub-region division needs to be generated.
@@ -28,3 +36,9 @@ Don't forget to open this file and revise the variable `mode` and `net_mode`:
 ```
 CUDA_VISIBLE_DEVICES=0 python smdl_explanation.py
 ```
+
+## 👍 Acknowledgement
+
+[Xplique](https://deel-ai.github.io/xplique/latest/): a Neural Networks Explainability Toolbox
+
+[Score-CAM](https://github.com/tabayashi0117/Score-CAM/): a third-party implementation with Keras.

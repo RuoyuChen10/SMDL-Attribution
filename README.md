@@ -15,6 +15,22 @@ opencv-contrib-python
 mtutils
 ```
 
+```
+conda create -n smdl python=3.10
+conda activate smdl
+python3 -m pip install tensorflow[and-cuda]
+
+pip install git+https://github.com/facebookresearch/segment-anything.git
+```
+
+## Some Sub-Region Division Method
+
+|Sub-Region Division Method| Attribution Visualization | Org. Prediction Score | Highest Prediction Score | Insertion AUC Score | 
+|:--:|:--:|:--:|:--:|:--:|
+| SLICO | ![](image/slico.png) | 0.7262 | 0.9522 | 0.7604 |
+| SEEDS | ![](image/seeds.png) | 0.7262 | 0.9918 | 0.8862 |
+| Prior Saliency Map + Patch | ![](image/prior_saliency_division.png) | 0.7262 | 0.9710 | 0.7236 |
+
 ## 1. Generate saliency map
 
 First, the priori saliency maps for sub-region division needs to be generated.

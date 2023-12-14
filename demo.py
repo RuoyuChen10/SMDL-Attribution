@@ -8,6 +8,7 @@ from keras.applications.resnet import (
     preprocess_input)
 
 import imageio
+from sklearn import metrics
 
 matplotlib.get_cachedir()
 plt.rc('font', family="Times New Roman")
@@ -15,7 +16,8 @@ plt.rc('font', family="Times New Roman")
 method = "HsicAttributionMethod"
 image_path = "datasets/CUB/test/4/Crested_Auklet_0059_794929.jpg"
 hsic_mask_path = "explanation_results/cub/{}/4/Crested_Auklet_0059_794929.npy".format(method)
-ours_mask_path = "submodular_results/cub/grad-10x10-4/{}-24-1.0-1.0-1.0-1.0/npy/4/Crested_Auklet_0059_794929.npy".format(method)
+# ours_mask_path = "submodular_results/cub/grad-10x10-4/{}-24-1.0-1.0-1.0-1.0/npy/4/Crested_Auklet_0059_794929.npy".format(method)
+ours_mask_path = "submodular_results-v1-iclr-results/cub/grad-10x10-4/HsicAttributionMethod-24-1.0-1.0-1.0-1.0/npy/4/Crested_Auklet_0059_794929.npy"
 class_index = 4
 steps = 25
 
@@ -91,7 +93,8 @@ def main():
     ours_best_index = np.argmax(insertion_ours_images_input_results)
 
     frames = []
-    x = list(np.linspace(0,1,steps))
+    # x = list(np.linspace(0,1,steps))
+    x = [(insertion_ours_image.sum(-1)!=0).sum() / (224 * 224) for insertion_ours_image in insertion_ours_images]
     for i in range(len(x)):
         fig, [ax1, ax2, ax3] = plt.subplots(1,3, gridspec_kw = {'width_ratios':[1, 1, 1.5]}, figsize=(30,8))
         ax1.spines["left"].set_visible(False)
@@ -168,7 +171,10 @@ def main():
         plt.savefig("gif_tmp.png", bbox_inches='tight')
         img_frame = cv2.imread("gif_tmp.png")
         frames.append(img_frame.copy()[...,::-1])
-    print("Highest confidence:{}, final confidence:{}".format(insertion_ours_images_input_results.numpy().max(), insertion_ours_images_input_results[-1]))
+
+    auc = metrics.auc(x, insertion_ours_images_input_results)
+
+    print("Highest confidence: {}\nfinal confidence: {}\nInsertion AUC: {}".format(insertion_ours_images_input_results.numpy().max(), insertion_ours_images_input_results[-1], auc))
     for j in range(20):
         frames.append(img_frame.copy()[...,::-1])
     

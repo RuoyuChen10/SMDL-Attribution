@@ -30,6 +30,7 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 | SLICO | ![](image/slico.png) | 0.7262 | 0.9522 | 0.7604 |
 | SEEDS | ![](image/seeds.png) | 0.7262 | 0.9918 | 0.8862 |
 | Prior Saliency Map + Patch | ![](image/prior_saliency_division.png) | 0.7262 | 0.9710 | 0.7236 |
+| Segment Anything Model | ![](image/sam.png) | 0.7262 | 0.9523 | 0.6803 |
 
 ## 1. Generate saliency map
 

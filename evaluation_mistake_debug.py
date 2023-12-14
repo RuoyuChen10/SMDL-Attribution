@@ -4,11 +4,11 @@ import json
 from tqdm import tqdm
 import numpy as np
 
-explanation_method = "submodular_results/cub-fair-vgg19/grad-10x10-4/ScoreCAM-24-1.0-1.0-20.0-1.0/json"
+explanation_method = "submodular_results/cub-fair-resnet/superpixel-seeds-1.0-1.0-10.0-1.0/json"
 # explanation_method = "explanation_insertion_results/cub-fair-vgg19/ScoreCAM"
-eval_list = "datasets/CUB/eval_fair-vgg19.txt"
-steps = 25
-percentage = 1
+eval_list = "datasets/CUB/eval_fair-resnet.txt"
+steps = 49
+percentage = 0.25
 number = int(percentage * steps)
 # 
 
@@ -25,7 +25,7 @@ def main():
         with open(json_file_path, 'r', encoding='utf-8') as f:
             f_data = json.load(f)
         
-        data = f_data['recognition_score'][:number]
+        data = f_data["consistency_score"][:number]
 
         highest_conf = max(data)
         highest_acc.append(highest_conf)

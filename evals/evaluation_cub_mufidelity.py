@@ -26,7 +26,7 @@ def load_image(path, size=224):
     return img
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Deletion Metric')
+    parser = argparse.ArgumentParser(description='MuFidelity Metric')
     # general
     parser.add_argument('--Datasets',
                         type=str,

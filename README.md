@@ -59,7 +59,7 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 
 ## 🗝️ How to Run (Updating)
 
-### 1. Generate saliency map
+### 1. Generate prior saliency map
 
 First, the priori saliency maps for sub-region division needs to be generated.
 
@@ -75,7 +75,7 @@ Don't forget to open this file and revise the variable `mode` and `net_mode`:
 
 
 
-### 2. Compute Minimal Interpretable Subset
+### 2. Compute attribution
 
 ```
 CUDA_VISIBLE_DEVICES=0 python smdl_explanation.py

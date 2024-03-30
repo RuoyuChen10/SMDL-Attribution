@@ -92,10 +92,10 @@ CUDA_VISIBLE_DEVICES=0 python smdl_explanation.py
 ## ✏️ Citation
 
 ```bibtex
-@inproceedings{chen2023less,
+@inproceedings{chen2024less,
   title={Less is More: Fewer Interpretable Region via Submodular Subset Selection},
   author={Chen, Ruoyu and Zhang, Hua and Liang, Siyuan and Li, Jingzhi and Cao, Xiaochun},
   booktitle={The Twelfth International Conference on Learning Representations},
-  year={2023}
+  year={2024}
 }
 ```

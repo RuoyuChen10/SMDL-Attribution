@@ -38,6 +38,7 @@ Uncertainty Estimation Models (Please download and put the models to the path `c
 opencv-python
 opencv-contrib-python
 mtutils
+xplique>=1.0.3
 ```
 
 ```

@@ -89,7 +89,7 @@ def parse_args():
                         help='')
     parser.add_argument('--cfg', 
                         type=str, 
-                        default="models/submodular_cfg_vgg_tf.json",
+                        default="configs/vggface2/submodular_cfg_vgg_tf.json",
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, default='./submodular_results/vggface2',

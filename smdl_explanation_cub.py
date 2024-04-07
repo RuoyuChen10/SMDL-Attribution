@@ -88,7 +88,7 @@ def parse_args():
                         help='')
     parser.add_argument('--cfg', 
                         type=str, 
-                        default="models/submodular_cfg_cub_tf-resnet.json",
+                        default="configs/cub/submodular_cfg_cub_tf-resnet.json",
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, default='./submodular_results/cub',

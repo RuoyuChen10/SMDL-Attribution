@@ -31,7 +31,7 @@ from insight_face_models import *
 
 class FaceSubModularExplanation(object):
     def __init__(self, 
-                 cfg_path="models/submodular_cfg.json",
+                 cfg_path="configs/celeba/submodular_cfg_celeba_tf.json",
                  n = 2,
                  k = 40,
                  lambda1 = 1.0,

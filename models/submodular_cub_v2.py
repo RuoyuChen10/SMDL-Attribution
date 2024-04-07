@@ -32,7 +32,7 @@ from tqdm import tqdm
 
 class CubSubModularExplanationV2(object):
     def __init__(self, 
-                 cfg_path="models/submodular_cfg_cub_tf-resnet-v2.json",
+                 cfg_path="configs/cub/submodular_cfg_cub_tf-resnet-v2.json",
                  k = 40,
                  lambda1 = 1.0,
                  lambda2 = 1.0,

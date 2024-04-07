@@ -30,7 +30,7 @@ from insight_face_models import *
 
 class CubSubModularExplanation(object):
     def __init__(self, 
-                 cfg_path="models/submodular_cfg_cub_tf.json",
+                 cfg_path="configs/cub/submodular_cfg_cub_tf.json",
                  n = 2,
                  k = 40,
                  lambda1 = 1.0,

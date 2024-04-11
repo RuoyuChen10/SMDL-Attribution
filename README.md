@@ -11,7 +11,7 @@
 
 ## 📰 News & Update
 
-- **[2024.04.11]** Our approach now supports multi-modal models with ViT as backbone! Welcome to try it according to the [tutorial](./tutorial-submodular-vit.ipynb)!
+- **[2024.04.11]** Our approach now supports multi-modal models with ViT as backbone (Pytorch only)! Welcome to try it according to the [tutorial](./tutorial-submodular-vit.ipynb)!
 - **[2024.01.17]** The original code is available now! Welcome to try it according to the [tutorial](./tutorial-submodular-cub.ipynb)!
 - **[2024.01.16]** The paper has been accepted by ICLR 2024 and selected for oral presentation!
 

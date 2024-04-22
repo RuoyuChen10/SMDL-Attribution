@@ -102,6 +102,18 @@ class MultiModalSubModularExplanation(object):
         
     #     return torch.stack(e_scores)
     
+    def proccess_compute_confidence_score(self):
+        """
+        Compute confidence score
+        """
+        # visual_features = self.model(batch_input_images)
+        # predicted_scores = torch.softmax(visual_features @ self.semantic_feature.T, dim=-1)
+        
+        entropy = - torch.sum(self.predicted_scores * torch.log(self.predicted_scores), dim=1)
+        max_entropy = torch.log(torch.tensor(self.predicted_scores.shape[1])).to(self.device)
+        confidence = (entropy / max_entropy)
+        return confidence 
+    
     def proccess_compute_effectiveness_score(self, sub_index_sets):
         """
         Compute each S's effectiveness score
@@ -124,8 +136,8 @@ class MultiModalSubModularExplanation(object):
         Compute each consistency score
         """
         visual_features = self.model(batch_input_images)
-        predicted_scores = torch.softmax(visual_features @ self.semantic_feature.T, dim=-1)
-        consistency_scores = predicted_scores[:, self.target_label]
+        self.predicted_scores = torch.softmax(visual_features @ self.semantic_feature.T, dim=-1)
+        consistency_scores = self.predicted_scores[:, self.target_label]
 
         return consistency_scores
     
@@ -150,51 +162,31 @@ class MultiModalSubModularExplanation(object):
         batch_input_images = sub_images.to(self.device)
         
         with torch.no_grad():
-            # 1. Confidence Score
-            if self.lambda1 == 0:
-                score_confidence = 0
             
             # 2. Effectiveness Score
-            if len(main_set) == 0:
-                score_effectiveness = torch.zeros(len(candidate_set), device=self.device)
-            else:
-                score_effectiveness = self.proccess_compute_effectiveness_score(sub_index_sets)
-            # Compute effectiveness score
-            # partition_images = torch.stack([
-            #     self.preproccessing_function(
-            #         partition_image
-            #     ) for partition_image in partition_image_set]).to(self.device)
-            
-            # partition_image_features = self.model(partition_images)
-            # score_effectiveness = self.proccess_compute_effectiveness_score(
-            #     partition_image_features, sub_index_sets)
-            
+            score_effectiveness = self.proccess_compute_effectiveness_score(sub_index_sets)
         
             # 3. Consistency Score
-            if self.lambda3 == 0:
-                score_consistency = 0
-            else:
-                score_consistency = self.proccess_compute_consistency_score(batch_input_images)
+            score_consistency = self.proccess_compute_consistency_score(batch_input_images)
             
             # 4. Collaboration Score
-            if self.lambda4 == 0:
-                score_collaboration = 0
-            else:
-                sub_images_reverse = torch.stack([
-                    self.preproccessing_function(
-                        self.org_img - self.merge_image(sub_index_set, partition_image_set)
-                    ) for sub_index_set in sub_index_sets])
+            sub_images_reverse = torch.stack([
+                self.preproccessing_function(
+                    self.org_img - self.merge_image(sub_index_set, partition_image_set)
+                ) for sub_index_set in sub_index_sets])
+        
+            batch_input_images_reverse = sub_images_reverse.to(self.device)
             
-                batch_input_images_reverse = sub_images_reverse.to(self.device)
-                
-                score_collaboration = 1 - self.proccess_compute_consistency_score(batch_input_images_reverse)
+            score_collaboration = 1 - self.proccess_compute_consistency_score(batch_input_images_reverse)
+            
+            # 1. Confidence Score
+            score_confidence = self.proccess_compute_confidence_score()
             
             # submodular score
             smdl_score = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
             arg_max_index = smdl_score.argmax().cpu().item()
             
-            
-            # self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
+            self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
             self.saved_json_file["effectiveness_score"].append(score_effectiveness[arg_max_index].cpu().item())
             self.saved_json_file["consistency_score"].append(score_consistency[arg_max_index].cpu().item())
             self.saved_json_file["collaboration_score"].append(score_collaboration[arg_max_index].cpu().item())

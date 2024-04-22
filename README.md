@@ -11,7 +11,8 @@
 
 ## 📰 News & Update
 
-- **[2024.04.11]** Our approach now supports multi-modal models with ViT as backbone (Pytorch only)! Welcome to try it according to the [tutorial](./tutorial-submodular-vit.ipynb)!
+- **[2024.04.22]** Our approach now supports LanguageBind interpretation! Welcome to try it according to the [tutorial](./tutorial-submodular-languagebind.ipynb)!
+- **[2024.04.11]** Our approach now supports multi-modal models with ViT as backbone ([ImageBind](https://github.com/facebookresearch/ImageBind), Pytorch only)! Welcome to try it according to the [tutorial](./tutorial-submodular-vit.ipynb)!
 - **[2024.01.17]** The original code is available now! Welcome to try it according to the [tutorial](./tutorial-submodular-cub.ipynb)!
 - **[2024.01.16]** The paper has been accepted by ICLR 2024 and selected for oral presentation!
 
@@ -90,6 +91,10 @@ CUDA_VISIBLE_DEVICES=0 python smdl_explanation.py
 [Score-CAM](https://github.com/tabayashi0117/Score-CAM/): a third-party implementation with Keras.
 
 [Segment-Anything](https://github.com/facebookresearch/segment-anything): a new AI model from Meta AI that can "cut out" any object, in any image, with a single click.
+
+[ImageBind](https://github.com/facebookresearch/ImageBind): ImageBind learns a joint embedding across six different modalities - images, text, audio, depth, thermal, and IMU data. It enables novel emergent applications ‘out-of-the-box’ including cross-modal retrieval, composing modalities with arithmetic, cross-modal detection and generation.
+
+[LanguageBind](https://github.com/PKU-YuanGroup/LanguageBind): LanguageBind is a language-centric multimodal pretraining approach, taking the language as the bind across different modalities because the language modality is well-explored and contains rich semantics.
 
 ## ✏️ Citation
 

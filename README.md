@@ -18,6 +18,8 @@
 
 ## 🐳 Model Zoo
 
+**Note: Our method will no more support TensorFlow/Keras, but focus on PyTorch.**
+
 Recognition Models (Please download and put the models to the path `ckpt/keras_model`):
 
 | Datasets | Model |
@@ -42,6 +44,8 @@ opencv-contrib-python
 mtutils
 xplique>=1.0.3
 ```
+
+Our original code is based on `Keras`, and the method of verification on the ViT model will be completely dependent on `Pytorch`.
 
 ```
 conda create -n smdl python=3.10

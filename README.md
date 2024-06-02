@@ -38,6 +38,8 @@ Uncertainty Estimation Models (Please download and put the models to the path `c
 
 ## 🛠️ Environment (Updating)
 
+Our method will both support `keras` and `pytorch` two deep learning frameworks.
+
 ```python
 opencv-python
 opencv-contrib-python
@@ -66,9 +68,13 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 
 ## 🗝️ How to Run (Updating)
 
-### 1. Generate prior saliency map
 
-First, the priori saliency maps for sub-region division needs to be generated.
+Please refer to the jupyter notebook first.
+
+<!-- ### 1. Generate prior saliency map -->
+
+
+<!-- First, the priori saliency maps for sub-region division needs to be generated.
 
 ```
 CUDA_VISIBLE_DEVICES=0 python generate_explanation_maps.py
@@ -86,7 +92,7 @@ Don't forget to open this file and revise the variable `mode` and `net_mode`:
 
 ```
 CUDA_VISIBLE_DEVICES=0 python smdl_explanation.py
-```
+``` -->
 
 ## 👍 Acknowledgement
 
@@ -95,6 +101,8 @@ CUDA_VISIBLE_DEVICES=0 python smdl_explanation.py
 [Score-CAM](https://github.com/tabayashi0117/Score-CAM/): a third-party implementation with Keras.
 
 [Segment-Anything](https://github.com/facebookresearch/segment-anything): a new AI model from Meta AI that can "cut out" any object, in any image, with a single click.
+
+[CLIP](https://github.com/openai/CLIP): a neural network trained on a variety of (image, text) pairs. It can be instructed in natural language to predict the most relevant text snippet, given an image, without directly optimizing for the task
 
 [ImageBind](https://github.com/facebookresearch/ImageBind): ImageBind learns a joint embedding across six different modalities - images, text, audio, depth, thermal, and IMU data. It enables novel emergent applications ‘out-of-the-box’ including cross-modal retrieval, composing modalities with arithmetic, cross-modal detection and generation.
 

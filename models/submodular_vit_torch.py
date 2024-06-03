@@ -180,13 +180,15 @@ class MultiModalSubModularExplanation(object):
             score_collaboration = 1 - self.proccess_compute_consistency_score(batch_input_images_reverse)
             
             # 1. Confidence Score
-            score_confidence = self.proccess_compute_confidence_score()
+            # score_confidence = self.proccess_compute_confidence_score()
             
             # submodular score
-            smdl_score = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
+            # smdl_score = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
+            smdl_score = self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
             arg_max_index = smdl_score.argmax().cpu().item()
             
-            self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
+            if self.lambda1 != 0:
+                self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
             self.saved_json_file["effectiveness_score"].append(score_effectiveness[arg_max_index].cpu().item())
             self.saved_json_file["consistency_score"].append(score_consistency[arg_max_index].cpu().item())
             self.saved_json_file["collaboration_score"].append(score_collaboration[arg_max_index].cpu().item())

@@ -11,6 +11,7 @@
 
 ## 📰 News & Update
 
+- **[2024.06.04]** Our approach now supports `multi-gpus` interpretation proccessing, please refer to the [./scripts](./scripts) fold!
 - **[2024.06.04]** Our approach now supports [CLIP](https://github.com/openai/CLIP) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-clip-vitl.ipynb)!
 - **[2024.04.22]** Our approach now supports [LanguageBind](https://github.com/PKU-YuanGroup/LanguageBind) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-languagebind.ipynb)!
 - **[2024.04.11]** Our approach now supports multi-modal models with ViT as backbone ([ImageBind](https://github.com/facebookresearch/ImageBind), Pytorch only)! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-imagebind.ipynb)!

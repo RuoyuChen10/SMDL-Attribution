@@ -159,7 +159,10 @@ def mkdir(name):
     '''
     isExists=os.path.exists(name)
     if not isExists:
-        os.makedirs(name)
+        try:
+            os.makedirs(name)
+        except:
+            print("already exist")
     return 0
 
 def norm(image):

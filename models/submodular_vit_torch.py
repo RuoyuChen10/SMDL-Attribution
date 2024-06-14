@@ -187,8 +187,8 @@ class MultiModalSubModularExplanation(object):
             smdl_score = self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
             arg_max_index = smdl_score.argmax().cpu().item()
             
-            if self.lambda1 != 0:
-                self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
+            # if self.lambda1 != 0:
+            #     self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
             self.saved_json_file["effectiveness_score"].append(score_effectiveness[arg_max_index].cpu().item())
             self.saved_json_file["consistency_score"].append(score_consistency[arg_max_index].cpu().item())
             self.saved_json_file["collaboration_score"].append(score_collaboration[arg_max_index].cpu().item())

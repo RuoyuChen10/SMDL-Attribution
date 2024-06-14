@@ -70,13 +70,29 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 
 ## 🗝️ How to Run (Updating)
 
+If you want to see how to apply this to your own model, please refer to the jupyter notebooks in [./tutorial/](./tutorial/) first.
 
-Please refer to the jupyter notebook first.
+Note: We first publish how to evaluate attribution for multimodal models and how to evaluate it.
 
 Multi GPUs, please refer to the [./scripts](./scripts) fold, for example:
 
-```
+```shell
 ./scripts/clip_multigpu.sh
+```
+
+Then, you may get a saved intermediate result in the path `submodular_results/imagenet-clip-vitl/slico-0.0-0.05-1.0-1.0`.
+
+Evaluate the Insertion and Deletion metrics:
+
+```shell
+python -m evals.eval_AUC_faithfulness --explanation-dir submodular_results/imagenet-clip-vitl/slico-0.0-0.05-1.0-1.0
+```
+
+you may get the results:
+
+```
+Insertion AUC Score: 0.7550
+Deletion AUC Score: 0.0814
 ```
 
 <!-- ### 1. Generate prior saliency map -->

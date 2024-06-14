@@ -21,18 +21,18 @@ from segment_anything import SamAutomaticMaskGenerator, sam_model_registry
 from utils import *
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Faithfulness Metric')
+    parser = argparse.ArgumentParser(description='Segment Anything')
     parser.add_argument('--image-dir', 
                         type=str, 
-                        default='./datasets/CUB/test',
+                        default='./datasets/imagenet/ILSVRC2012_img_val',
                         help='')
     parser.add_argument('--image-file', 
                         type=str, 
-                        default='./datasets/CUB/eval_random.txt',
+                        default='./datasets/imagenet/val_clip_vitl_5k_true.txt',
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, 
-                        default='./SAM_mask/CUB-resnet',
+                        default='./SAM_mask/imagenet-clip-vitl',
                         help='')
     args = parser.parse_args()
     return args
@@ -93,8 +93,8 @@ def main(args):
         masks = mask_generator.generate(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         element_sets_V = processing_sam_concepts(masks, image)
 
-        mkdir(os.path.join(args.save_dir, str(y_label)))
-        np.save(os.path.join(args.save_dir, image_path.replace(".jpg", "")), np.array(element_sets_V))
+        # mkdir(os.path.join(args.save_dir, str(y_label)))
+        np.save(os.path.join(args.save_dir, image_path.replace(".jpg", "").replace(".JPEG", "")), np.array(element_sets_V))
 
     return
 

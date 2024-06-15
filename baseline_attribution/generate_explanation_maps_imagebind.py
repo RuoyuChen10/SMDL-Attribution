@@ -40,6 +40,20 @@ tf.config.experimental.set_virtual_device_configuration(
     [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=2048)]
 )
 
+data_transform = transforms.Compose(
+        [
+            transforms.Resize(
+                (224,224), interpolation=transforms.InterpolationMode.BICUBIC
+            ),
+            # transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(
+                mean=(0.48145466, 0.4578275, 0.40821073),
+                std=(0.26862954, 0.26130258, 0.27577711),
+            ),
+        ]
+    )
+
 SAVE_PATH = "explanation_results/"
 mkdir(SAVE_PATH)
 
@@ -49,8 +63,8 @@ net_mode  = "imagebind" # "resnet", vgg
 if mode == "imagenet":
     if net_mode == "imagebind":
         img_size = 224
-        dataset_index = "datasets/imagenet/val_imagebind_5k_true.txt"
-        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-imagebind-true")
+        dataset_index = "datasets/imagenet/val_imagebind_2k_false.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-imagebind-false")
     # elif net_mode == "languagebind":
         
     dataset_path = "datasets/imagenet/ILSVRC2012_img_val"
@@ -101,20 +115,6 @@ def load_and_transform_vision_data(image_paths, device, channel_first=False):
         return None
 
     image_outputs = []
-
-    data_transform = transforms.Compose(
-        [
-            transforms.Resize(
-                (224,224), interpolation=transforms.InterpolationMode.BICUBIC
-            ),
-            # transforms.CenterCrop(224),
-            transforms.ToTensor(),
-            transforms.Normalize(
-                mean=(0.48145466, 0.4578275, 0.40821073),
-                std=(0.26862954, 0.26130258, 0.27577711),
-            ),
-        ]
-    )
     
     for image_path in image_paths:
         with open(image_path, "rb") as fopen:

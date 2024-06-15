@@ -28,11 +28,11 @@ def parse_args():
                         help='')
     parser.add_argument('--image-file', 
                         type=str, 
-                        default='./datasets/imagenet/val_clip_vitl_5k_true.txt',
+                        default='./datasets/imagenet/val_imagebind_2k_false.txt',
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, 
-                        default='./SAM_mask/imagenet-clip-vitl',
+                        default='./SAM_mask/imagenet',
                         help='')
     args = parser.parse_args()
     return args
@@ -86,16 +86,21 @@ def main(args):
     
     mkdir("SAM_mask")
     mkdir(args.save_dir)
-    
+    print("Begin Inference")
     for image_path, y_label in zip(input_data, label):
-        image = cv2.imread(os.path.join(args.image_dir, image_path))
+        try:
+            if os.path.exists(os.path.join(args.save_dir, image_path.replace(".jpg", ".npy").replace(".JPEG", ".npy"))):
+                continue
+            
+            image = cv2.imread(os.path.join(args.image_dir, image_path))
 
-        masks = mask_generator.generate(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-        element_sets_V = processing_sam_concepts(masks, image)
+            masks = mask_generator.generate(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+            element_sets_V = processing_sam_concepts(masks, image)
 
-        # mkdir(os.path.join(args.save_dir, str(y_label)))
-        np.save(os.path.join(args.save_dir, image_path.replace(".jpg", "").replace(".JPEG", "")), np.array(element_sets_V))
-
+            # mkdir(os.path.join(args.save_dir, str(y_label)))
+            np.save(os.path.join(args.save_dir, image_path.replace(".jpg", "").replace(".JPEG", "")), np.array(element_sets_V))
+        except:
+            print("Image {} need larger CUDA.".format(image_path))
     return
 
 if __name__ == "__main__":

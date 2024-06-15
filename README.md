@@ -4,13 +4,14 @@
 [![arXiv](https://img.shields.io/badge/Arxiv-2402.09164-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2402.09164)
 ![Python 3.8](https://img.shields.io/badge/python-3.8-green.svg?style=plastic)
 ![Pytorch 1.12.1](https://img.shields.io/badge/pytorch-1.12.1-green.svg?style=plastic)
-![TensorFlow 2.12.0](https://img.shields.io/badge/tensorflow-2.12.0-green.svg?style=plastic)
+<!-- ![TensorFlow 2.12.0](https://img.shields.io/badge/tensorflow-2.12.0-green.svg?style=plastic) -->
 ![License CC BY-NC](https://img.shields.io/badge/license-Apache_2.0-green.svg?style=plastic)
 
 ![](./image/abstract.gif)
 
 ## 📰 News & Update
 
+- **[2024.06.16]** Our approach now supports medical multimodal model [Quilt](https://github.com/wisdomikezogwo/quilt1m/) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-quilt.ipynb)!
 - **[2024.06.04]** Our approach now supports `multi-gpus` interpretation proccessing, please refer to the [./scripts](./scripts) fold!
 - **[2024.06.04]** Our approach now supports [CLIP](https://github.com/openai/CLIP) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-clip-vitl.ipynb)!
 - **[2024.04.22]** Our approach now supports [LanguageBind](https://github.com/PKU-YuanGroup/LanguageBind) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-languagebind.ipynb)!
@@ -67,6 +68,10 @@ pip install git+https://github.com/facebookresearch/segment-anything.git
 | SEEDS | ![](image/seeds.png) | 0.7262 | 0.9918 | 0.8862 |
 | Prior Saliency Map + Patch | ![](image/prior_saliency_division.png) | 0.7262 | 0.9710 | 0.7236 |
 | Segment Anything Model | ![](image/sam.png) | 0.7262 | 0.9523 | 0.6803 |
+
+Medical multimodal model debugging:
+
+![](image/medical_debug.jpg)
 
 ## 🗝️ How to Run (Updating)
 

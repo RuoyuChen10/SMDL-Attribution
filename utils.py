@@ -102,6 +102,14 @@ cub_templates = [
     'a photo of a {}, a type of bird.',
 ]
 
+lc_lung_classes = [
+    "lung adenocarcinoma",
+    "benign lung",
+    "lung squamous cell carcinoma"
+]
+
+lc_lung_template = 'a histopathology slide showing {}'
+
 def load_image(path, size=224):
     img = cv2.resize(cv2.imread(path)[...,::-1], (size, size))
     return img.astype(np.float32)

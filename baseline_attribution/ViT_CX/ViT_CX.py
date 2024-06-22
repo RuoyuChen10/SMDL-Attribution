@@ -39,7 +39,10 @@ def reshape_function_vit(tensor, height=14, width=14):
         result = tensor[:, 1:, :].reshape(tensor.size(0),
                                         height, width, tensor.size(2))
     elif tensor.shape[1] == 1:
-        height=16; width=16
+        if tensor.shape[-1] == 768: # Quilt
+            height=7; width=7
+        else:   #CLIP
+            height=16; width=16
         tensor = tensor.transpose(0,1)
         result = tensor[:, 1:, :].reshape(tensor.size(0),
                                         height, width, tensor.size(2))

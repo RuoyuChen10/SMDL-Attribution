@@ -47,8 +47,8 @@ net_mode  = "languagebind" # "resnet", vgg
 if mode == "imagenet":
     if net_mode == "languagebind":
         img_size = 224
-        dataset_index = "datasets/imagenet/val_languagebind_5k_true.txt"
-        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-languagebind-true")
+        dataset_index = "datasets/imagenet/val_languagebind_2k_false.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-languagebind-false")
     # elif net_mode == "languagebind":
         
     dataset_path = "datasets/imagenet/ILSVRC2012_img_val"

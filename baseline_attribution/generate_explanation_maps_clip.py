@@ -35,7 +35,7 @@ tf.config.run_functions_eagerly(True)
 gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
 tf.config.experimental.set_virtual_device_configuration(
     gpus[0],
-    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)]
+    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=2048)]
 )
 
 SAVE_PATH = "explanation_results/"
@@ -47,8 +47,8 @@ net_mode  = "CLIP" # "resnet", vgg
 if mode == "CLIP":
     if net_mode == "CLIP":
         img_size = 224
-        dataset_index = "datasets/imagenet/val_clip_vitl_2k_false.txt"
-        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-clip-vitl-false")
+        dataset_index = "datasets/imagenet/val_clip_vitl_5k_true.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-clip-vitl-true")
     # elif net_mode == "languagebind":
         
     dataset_path = "datasets/imagenet/ILSVRC2012_img_val"
@@ -74,9 +74,9 @@ class CLIPModel_Super(torch.nn.Module):
             
     def forward(self, vision_inputs):
         
-        with torch.no_grad():
-            image_features = self.model.encode_image(vision_inputs)
-            image_features /= image_features.norm(dim=-1, keepdim=True)
+        # with torch.no_grad():
+        image_features = self.model.encode_image(vision_inputs)
+        image_features = image_features / image_features.norm(dim=-1, keepdim=True)
         
         scores = (image_features @ self.text_features.T).softmax(dim=-1)
         return scores.float()
@@ -147,14 +147,14 @@ def main():
     
     wrapped_model = TorchWrapper(vis_model.eval(), device)
     
-    batch_size = 64
+    batch_size = 32
     
     # define explainers
     explainers = [
         # Saliency(model),
         # GradientInput(model),
         # GuidedBackprop(model),
-        # IntegratedGradients(model, steps=80, batch_size=batch_size),
+        IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
         # SmoothGrad(model, nb_samples=80, batch_size=batch_size),
         # SquareGrad(model, nb_samples=80, batch_size=batch_size),
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
@@ -163,10 +163,10 @@ def main():
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
         # Rise(model, nb_samples=500, batch_size=batch_size),
         # SobolAttributionMethod(model, batch_size=batch_size),
-        HsicAttributionMethod(wrapped_model, batch_size=batch_size),
-        Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
+        # HsicAttributionMethod(wrapped_model, batch_size=batch_size),
+        # Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
         # Lime(model, nb_samples = 1000),
-        # KernelShap(model, nb_samples = 1000, batch_size=32)
+        KernelShap(wrapped_model, nb_samples = 1000, batch_size=32)
     ]
     
     # data preproccess

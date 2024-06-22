@@ -71,7 +71,7 @@ def main():
         explanation = np.load(mask_path)
 
         insertion_explanation_images = []
-        for i in range(1, steps):
+        for i in range(1, steps+1):
             perturbed_rate = i / steps
             insertion_explanation_images.append(perturbed(image, explanation, rate = perturbed_rate, mode = "insertion"))
         

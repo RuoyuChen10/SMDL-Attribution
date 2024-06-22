@@ -4,9 +4,9 @@ import json
 from tqdm import tqdm
 import numpy as np
 
-# explanation_method = "submodular_results/cub-fair-resnet/superpixel-seeds-1.0-1.0-10.0-1.0/json"
-explanation_method = "explanation_insertion_results/imagenet-fair-clip-vitl/ViT-CX"
-eval_list = "datasets/imagenet/val_clip_vitl_2k_false.txt"
+
+explanation_method = "explanation_insertion_results/imagenet-fair-imagebind/ViT-CX"
+eval_list = "datasets/imagenet/val_imagebind_2k_false.txt"
 # steps = 49
 # percentage = 0.25
 # number = int(percentage * steps)
@@ -20,7 +20,7 @@ def main(percentage):
     region_area = []
 
     for info in tqdm(infos[:]):
-        json_file_path = os.path.join(explanation_method, info.split(" ")[0].replace(".jpg", ".json").replace(".JPEG", ".json"))
+        json_file_path = os.path.join(explanation_method, info.split(" ")[0].replace(".jpg", ".json").replace(".JPEG", ".json").replace(".jpeg", ".json"))
 
         with open(json_file_path, 'r', encoding='utf-8') as f:
             f_data = json.load(f)

@@ -8,6 +8,6 @@
         "num_classes": 10177
     },
     "redundancy_distance_metric": "cosine",
-    "device": "cuda:1",
+    "device": "cuda:0",
     "mode": "TF"
 }

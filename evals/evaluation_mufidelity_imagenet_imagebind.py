@@ -71,7 +71,7 @@ def parse_args():
                         help='Datasets.')
     parser.add_argument('--eval-number',
                         type=int,
-                        default=1000,
+                        default=None,
                         help='Datasets.')
     parser.add_argument('--explanation-method', 
                         type=str, 

@@ -7,7 +7,8 @@
         "model_path": "ckpt/keras_model/cub-efficientnetv2m.h5",
         "num_classes": 200
     },
-    "redundancy_distance_metric": "cosine",
+    "effectiveness_distance_metric": "cosine",
     "device": "cuda:1",
-    "mode": "TF"
+    "mode": "TF",
+    "version": 2
 }

@@ -16,13 +16,13 @@ from PIL import Image
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
-from languagebind import LanguageBind, to_device, transform_dict, LanguageBindImageTokenizer
-
 from xplique.wrappers import TorchWrapper
 from xplique.plots import plot_attributions
 from xplique.attributions import (Saliency, GradientInput, IntegratedGradients, SmoothGrad, VarGrad,
                                   SquareGrad, GradCAM, Occlusion, Rise, GuidedBackprop,
                                   GradCAMPP, Lime, KernelShap, SobolAttributionMethod, HsicAttributionMethod)
+
+from languagebind import LanguageBind, to_device, transform_dict, LanguageBindImageTokenizer
 
 import torch
 from torchvision import transforms
@@ -47,8 +47,8 @@ net_mode  = "languagebind" # "resnet", vgg
 if mode == "imagenet":
     if net_mode == "languagebind":
         img_size = 224
-        dataset_index = "datasets/imagenet/val_languagebind_2k_false.txt"
-        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-languagebind-false")
+        dataset_index = "datasets/imagenet/val_languagebind_5k_true.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-languagebind-true")
     # elif net_mode == "languagebind":
         
     dataset_path = "datasets/imagenet/ILSVRC2012_img_val"
@@ -100,8 +100,8 @@ class LanguageBindModel_Super(torch.nn.Module):
                 # "vision": vision_inputs,
                 self.mode: self.semantic_modal
             }
-        with torch.no_grad():
-            self.semantic_modal = self.base_model(input)[self.mode]
+        # with torch.no_grad():
+        self.semantic_modal = self.base_model(input)[self.mode]
         print("Equip with {} modal.".format(self.mode))
     
     def forward(self, vision_inputs):
@@ -115,8 +115,8 @@ class LanguageBindModel_Super(torch.nn.Module):
             "video": {'pixel_values': vision_inputs},
         }
         
-        with torch.no_grad():
-            embeddings = self.base_model(inputs)
+        # with torch.no_grad():
+        embeddings = self.base_model(inputs)
             
         scores = torch.softmax(embeddings["video"] @ self.semantic_modal.T, dim=-1)
         return scores
@@ -195,14 +195,14 @@ def main():
     
     wrapped_model = TorchWrapper(vis_model.eval(), device)
     
-    batch_size = 64
+    batch_size = 2
     
     # define explainers
     explainers = [
         # Saliency(model),
         # GradientInput(model),
         # GuidedBackprop(model),
-        # IntegratedGradients(model, steps=80, batch_size=batch_size),
+        # IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
         # SmoothGrad(model, nb_samples=80, batch_size=batch_size),
         # SquareGrad(model, nb_samples=80, batch_size=batch_size),
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
@@ -211,10 +211,10 @@ def main():
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
         # Rise(model, nb_samples=500, batch_size=batch_size),
         # SobolAttributionMethod(model, batch_size=batch_size),
-        HsicAttributionMethod(wrapped_model, batch_size=batch_size),
-        Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
+        # HsicAttributionMethod(wrapped_model, batch_size=batch_size),
+        # Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
         # Lime(model, nb_samples = 1000),
-        # KernelShap(model, nb_samples = 1000, batch_size=32)
+        KernelShap(wrapped_model, nb_samples = 1000, batch_size=batch_size)
     ]
     
     # data preproccess

@@ -63,8 +63,8 @@ net_mode  = "imagebind" # "resnet", vgg
 if mode == "imagenet":
     if net_mode == "imagebind":
         img_size = 224
-        dataset_index = "datasets/imagenet/val_imagebind_2k_false.txt"
-        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-imagebind-false")
+        dataset_index = "datasets/imagenet/val_imagebind_5k_true.txt"
+        SAVE_PATH = os.path.join(SAVE_PATH, "imagenet-imagebind-true")
     # elif net_mode == "languagebind":
         
     dataset_path = "datasets/imagenet/ILSVRC2012_img_val"
@@ -104,8 +104,8 @@ class ImageBindModel_Super(torch.nn.Module):
             "vision": vision_inputs,
         }
         
-        with torch.no_grad():
-            embeddings = self.base_model(inputs)
+        # with torch.no_grad():
+        embeddings = self.base_model(inputs)
         
         scores = torch.softmax(embeddings["vision"] @ self.semantic_modal.T, dim=-1)
         return scores
@@ -149,7 +149,7 @@ def zeroshot_classifier(model, classnames, templates, device):
     return zeroshot_weights
 
 def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cuda:1" if torch.cuda.is_available() else "cpu"
     # Load model
     model = imagebind_model.imagebind_huge(pretrained=True)
     model.eval()
@@ -170,14 +170,14 @@ def main():
     
     wrapped_model = TorchWrapper(vis_model.eval(), device)
     
-    batch_size = 64
+    batch_size = 16
     
     # define explainers
     explainers = [
         # Saliency(model),
         # GradientInput(model),
         # GuidedBackprop(model),
-        # IntegratedGradients(model, steps=80, batch_size=batch_size),
+        # IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
         # SmoothGrad(model, nb_samples=80, batch_size=batch_size),
         # SquareGrad(model, nb_samples=80, batch_size=batch_size),
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
@@ -186,10 +186,10 @@ def main():
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
         # Rise(model, nb_samples=500, batch_size=batch_size),
         # SobolAttributionMethod(model, batch_size=batch_size),
-        HsicAttributionMethod(wrapped_model, batch_size=batch_size),
-        Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
+        # HsicAttributionMethod(wrapped_model, batch_size=batch_size),
+        # Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
         # Lime(model, nb_samples = 1000),
-        # KernelShap(model, nb_samples = 1000, batch_size=32)
+        KernelShap(wrapped_model, nb_samples = 1000, batch_size=batch_size)
     ]
     
     # data preproccess

@@ -4,9 +4,9 @@ import json
 from tqdm import tqdm
 import numpy as np
 
-explanation_method = "./submodular_results/lung-quilt-debug/slico-0.0-0.05-10.0-1.0"
+explanation_method = "./submodular_results-superpixel/cub-fair-resnet/superpixel-seeds-1.0-1.0-20.0-1.0"
 # explanation_method = "explanation_insertion_results/imagenet-fair-clip-vitl/Rise"
-eval_list = "datasets/medical_lung/LC25000_lung_quilt_1k_false.txt"
+eval_list = "datasets/CUB/eval_fair-resnet.txt"
 
 # percentage = 1.
 

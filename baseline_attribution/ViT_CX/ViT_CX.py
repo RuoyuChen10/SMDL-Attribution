@@ -43,9 +43,24 @@ def reshape_function_vit(tensor, height=14, width=14):
             height=7; width=7
         else:   #CLIP
             height=16; width=16
+        # [257, 1, 1024]
         tensor = tensor.transpose(0,1)
         result = tensor[:, 1:, :].reshape(tensor.size(0),
                                         height, width, tensor.size(2))
+        print(tensor.shape)
+        # [1, 257, 1024]
+        print("================")
+    if tensor.shape[0] == 8:    # languagebind [8,257,1024]
+        height=16; width=16
+        # tensor = tensor.transpose(0,1)
+        # tensor = tensor.unsqueeze(0)    # [1, 257,8,1024]
+        
+        tensor = tensor[0]
+        tensor = tensor.unsqueeze(0)    # [1, 257,1024]
+        
+        result = tensor[:, 1:, :].reshape(tensor.size(0),
+                                        height, width, tensor.size(2))
+        # print(result.shape)
     result = result.transpose(2, 3).transpose(1, 2)
     return result
 

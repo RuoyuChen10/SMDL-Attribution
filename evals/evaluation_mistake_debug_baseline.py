@@ -5,8 +5,8 @@ from tqdm import tqdm
 import numpy as np
 
 
-explanation_method = "explanation_insertion_results/imagenet-fair-imagebind/ViT-CX"
-eval_list = "datasets/imagenet/val_imagebind_2k_false.txt"
+explanation_method = "explanation_insertion_results/imagenet-fair-languagebind/ViT-CX"
+eval_list = "datasets/imagenet/val_languagebind_2k_false.txt"
 # steps = 49
 # percentage = 0.25
 # number = int(percentage * steps)

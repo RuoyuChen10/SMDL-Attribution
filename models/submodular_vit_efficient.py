@@ -275,6 +275,9 @@ class MultiModalSubModularExplanationEfficientV2(MultiModalSubModularExplanation
             # 3. Consistency Score
             score_consistency = self.proccess_compute_consistency_score(batch_input_images)
             
+            # 1. Confidence Score
+            score_confidence = self.proccess_compute_confidence_score()
+            
             # 4. Collaboration Score
             sub_images_reverse = torch.stack([
                 self.preproccessing_function(
@@ -285,23 +288,20 @@ class MultiModalSubModularExplanationEfficientV2(MultiModalSubModularExplanation
             
             score_collaboration = 1 - self.proccess_compute_consistency_score(batch_input_images_reverse)
             
-            # 1. Confidence Score
-            # score_confidence = self.proccess_compute_confidence_score()
-            
             # submodular score
             # smdl_score = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
-            smdl_score = self.lambda2 * score_effectiveness + self.lambda3 * score_consistency + self.lambda4 * score_collaboration
+            smdl_score = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness + self.lambda3 * score_consistency + self.lambda4 * score_collaboration
             arg_max_index = smdl_score.argmax().cpu().item()
             
             # if self.lambda1 != 0:
-            #     self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
+            self.saved_json_file["confidence_score_increase"].append(score_confidence[arg_max_index].cpu().item())
             self.saved_json_file["effectiveness_score_increase"].append(score_effectiveness[arg_max_index].cpu().item())
             self.saved_json_file["consistency_score_increase"].append(score_consistency[arg_max_index].cpu().item())
             self.saved_json_file["collaboration_score_increase"].append(score_collaboration[arg_max_index].cpu().item())
             self.saved_json_file["smdl_score"].append(smdl_score[arg_max_index].cpu().item())
 
             if len(candidate_set) > self.pending_samples:
-                smdl_score_decrease = self.lambda2 * score_effectiveness_decrease + self.lambda3 * score_consistency + self.lambda4 * score_collaboration
+                smdl_score_decrease = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness_decrease + self.lambda3 * score_consistency + self.lambda4 * score_collaboration
                 
                 # Select the sample with the worst score as the negative sample estimate
                 negtive_sampels_indexes = smdl_score_decrease.topk(self.pending_samples, largest = False).indices.cpu().numpy()
@@ -324,17 +324,25 @@ class MultiModalSubModularExplanationEfficientV2(MultiModalSubModularExplanation
                         self.org_img - self.merge_image(sub_index_set, partition_image_set)
                     ) for sub_index_set in sub_index_negtive_sets])
                 
+                # 2. Effectiveness Score
+                score_effectiveness_decrease_ = score_effectiveness_decrease[negtive_sampels_indexes]
+                
                 # 3. Consistency Score
                 score_consistency_decrease = self.proccess_compute_consistency_score(sub_images_decrease.to(self.device))
+                
+                # 1. Confidence Score
+                score_confidence_decrease = self.proccess_compute_confidence_score()
                 
                 # 4. Collaboration Score
                 score_collaboration_decrease = 1 - self.proccess_compute_consistency_score(sub_images_decrease_reverse.to(self.device))
                 
-                smdl_score_decrease = self.lambda3 * score_consistency_decrease + self.lambda4 * score_collaboration_decrease
+                smdl_score_decrease = self.lambda1 * score_confidence_decrease + self.lambda2 * score_effectiveness_decrease_ + self.lambda3 * score_consistency_decrease + self.lambda4 * score_collaboration_decrease
                 arg_min_index = smdl_score_decrease.argmin().cpu().item()
                 
                 decrease_set = sub_index_negtive_sets[arg_min_index]
-            
+
+                self.saved_json_file["confidence_score_decrease"].append(score_confidence_decrease[arg_min_index].cpu().item())
+                self.saved_json_file["effectiveness_score_decrease"].append(score_effectiveness_decrease_[arg_min_index].cpu().item())
                 self.saved_json_file["consistency_score_decrease"].append(1-score_collaboration_decrease[arg_min_index].cpu().item())
                 self.saved_json_file["collaboration_score_decrease"].append(1-score_consistency_decrease[arg_min_index].cpu().item())
 

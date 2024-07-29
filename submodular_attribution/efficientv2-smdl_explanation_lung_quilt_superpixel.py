@@ -162,7 +162,10 @@ def main(args):
     save_json_root_path = os.path.join(save_dir, "json")
     mkdir(save_json_root_path)
     
-    select_infos = infos[args.begin : args.end]
+    end = args.end
+    if end == -1:
+        end = None
+    select_infos = infos[args.begin : end]
     for info in tqdm(select_infos):
         gt_id = info.split(" ")[1]
         

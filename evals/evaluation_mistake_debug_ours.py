@@ -4,9 +4,9 @@ import json
 from tqdm import tqdm
 import numpy as np
 
-explanation_method = "./submodular_results-superpixel/cub-fair-resnet/superpixel-seeds-1.0-1.0-20.0-1.0"
+explanation_method = "./submodular_results/imagenet-imagebind-efficientv1/slico-0.0-1.0-10.0-1.0"
 # explanation_method = "explanation_insertion_results/imagenet-fair-clip-vitl/Rise"
-eval_list = "datasets/CUB/eval_fair-resnet.txt"
+eval_list = "datasets/imagenet/val_imagebind_5k_true.txt"
 
 # percentage = 1.
 
@@ -43,6 +43,9 @@ def main(percentage):
         number = (np.array(insertion_area) <= percentage).sum()
         
         data = f_data["consistency_score"][:number]
+        
+        if len(data) == 0:
+            continue
 
         highest_conf = max(data)
         highest_acc.append(highest_conf)

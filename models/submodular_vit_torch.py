@@ -108,10 +108,9 @@ class MultiModalSubModularExplanation(object):
         """
         # visual_features = self.model(batch_input_images)
         # predicted_scores = torch.softmax(visual_features @ self.semantic_feature.T, dim=-1)
-        
-        entropy = - torch.sum(self.predicted_scores * torch.log(self.predicted_scores), dim=1)
+        entropy = - torch.sum(self.predicted_scores * torch.log(self.predicted_scores + 1e-7), dim=1)
         max_entropy = torch.log(torch.tensor(self.predicted_scores.shape[1])).to(self.device)
-        confidence = (entropy / max_entropy)
+        confidence = 1 - (entropy / max_entropy)
         return confidence 
     
     def proccess_compute_effectiveness_score(self, sub_index_sets):
@@ -169,6 +168,9 @@ class MultiModalSubModularExplanation(object):
             # 3. Consistency Score
             score_consistency = self.proccess_compute_consistency_score(batch_input_images)
             
+            # 1. Confidence Score
+            score_confidence = self.proccess_compute_confidence_score()
+            
             # 4. Collaboration Score
             sub_images_reverse = torch.stack([
                 self.preproccessing_function(
@@ -183,12 +185,12 @@ class MultiModalSubModularExplanation(object):
             # score_confidence = self.proccess_compute_confidence_score()
             
             # submodular score
-            # smdl_score = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
-            smdl_score = self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
+            smdl_score = self.lambda1 * score_confidence + self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
+            # smdl_score = self.lambda2 * score_effectiveness +  self.lambda3 * score_consistency + self.lambda4 * score_collaboration
             arg_max_index = smdl_score.argmax().cpu().item()
             
             # if self.lambda1 != 0:
-            #     self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
+            self.saved_json_file["confidence_score"].append(score_confidence[arg_max_index].cpu().item())
             self.saved_json_file["effectiveness_score"].append(score_effectiveness[arg_max_index].cpu().item())
             self.saved_json_file["consistency_score"].append(score_consistency[arg_max_index].cpu().item())
             self.saved_json_file["collaboration_score"].append(score_collaboration[arg_max_index].cpu().item())

@@ -16,11 +16,11 @@ import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/lung-quilt-false/ViT-CX"
+explanation_method = "explanation_results/lung-quilt-false/KernelShap"
 image_root_path = "datasets/medical_lung/lung_dataset"
 eval_list = "datasets/medical_lung/LC25000_lung_quilt_1k_false.txt"
 save_doc = "lung-fair-quilt"
-steps = 50
+steps = 100
 batch_size = 10
 image_size_ = 224
 
@@ -119,7 +119,7 @@ def main():
         class_index = int(info.split(" ")[-1])
         image_path = os.path.join(image_root_path, info.split(" ")[0])
 
-        mask_path = os.path.join(explanation_method, info.split(" ")[0].replace(".jpeg", ".npy"))
+        mask_path = os.path.join(explanation_method, info.split(" ")[0].replace(".jpeg", ".jpeg.npy"))
 
         image = cv2.imread(image_path)
         image = cv2.resize(image, (image_size_, image_size_))

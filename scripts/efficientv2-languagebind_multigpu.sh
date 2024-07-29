@@ -5,7 +5,7 @@ eval_list="datasets/imagenet/val_languagebind_5k_true.txt"
 lambda1=0
 lambda2=0.05
 lambda3=20
-lambda4=1
+lambda4=5
 superpixel_algorithm="seeds"
 pending_samples=8
 

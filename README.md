@@ -21,12 +21,18 @@
 
 ## 🛠️ Environment (Updating)
 
-Our method will both support `keras` and `pytorch` two deep learning frameworks.
+Our method will both support `keras` and `pytorch` two deep learning frameworks. You can first install `pytorch`.
 
 ```python
 opencv-python
 opencv-contrib-python
 mtutils
+tqdm
+scipy
+scikit-learn
+scikit-image
+matplotlib==3.7.1
+seaborn==3.7.1
 xplique>=1.0.3
 ```
 

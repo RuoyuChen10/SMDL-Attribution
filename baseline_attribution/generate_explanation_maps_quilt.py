@@ -131,7 +131,7 @@ def main():
         # Saliency(model),
         # GradientInput(model),
         # GuidedBackprop(model),
-        # IntegratedGradients(model, steps=80, batch_size=batch_size),
+        # IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
         # SmoothGrad(model, nb_samples=80, batch_size=batch_size),
         # SquareGrad(model, nb_samples=80, batch_size=batch_size),
         # VarGrad(model, nb_samples=80, batch_size=batch_size),
@@ -140,10 +140,10 @@ def main():
         # Occlusion(model, patch_size=10, patch_stride=5, batch_size=batch_size),
         # Rise(model, nb_samples=500, batch_size=batch_size),
         # SobolAttributionMethod(model, batch_size=batch_size),
-        HsicAttributionMethod(wrapped_model, batch_size=batch_size),
-        Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
+        # HsicAttributionMethod(wrapped_model, batch_size=batch_size),
+        # Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
         # Lime(model, nb_samples = 1000),
-        # KernelShap(model, nb_samples = 1000, batch_size=32)
+        KernelShap(wrapped_model, nb_samples = 1000, batch_size=32)
     ]
     
     # data preproccess

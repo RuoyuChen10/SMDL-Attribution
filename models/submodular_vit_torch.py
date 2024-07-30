@@ -128,15 +128,19 @@ class MultiModalSubModularExplanation(object):
             e_score = torch.sum(torch.min(adjusted_cosine_dist, dim=1).values)
             e_scores.append(e_score)
         
-        return torch.stack(e_scores)
+        effectiveness_score = torch.stack(e_scores)
+        if len(sub_index_sets[0]) == 1:
+            effectiveness_score = effectiveness_score * 0
+        return effectiveness_score
     
     def proccess_compute_consistency_score(self, batch_input_images):
         """
         Compute each consistency score
         """
-        visual_features = self.model(batch_input_images)
-        self.predicted_scores = torch.softmax(visual_features @ self.semantic_feature.T, dim=-1)
-        consistency_scores = self.predicted_scores[:, self.target_label]
+        with torch.no_grad():
+            visual_features = self.model(batch_input_images)
+            self.predicted_scores = torch.softmax(visual_features @ self.semantic_feature.T, dim=-1)
+            consistency_scores = self.predicted_scores[:, self.target_label]
 
         return consistency_scores
     

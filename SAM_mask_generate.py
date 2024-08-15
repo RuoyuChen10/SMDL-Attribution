@@ -28,7 +28,7 @@ def parse_args():
                         help='')
     parser.add_argument('--image-file', 
                         type=str, 
-                        default='./datasets/imagenet/val_languagebind_5k_true.txt',
+                        default='./datasets/imagenet/val_clip_rn101_5k_true.txt',
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, 
@@ -78,7 +78,7 @@ def main(args):
     
     input_data = []
     label = []
-    for data in datas[800:]:
+    for data in datas[:]:
         label.append(int(data.strip().split(" ")[-1]))
         input_data.append(
             data.split(" ")[0]

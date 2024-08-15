@@ -85,6 +85,10 @@ def parse_args():
                         type=int,
                         default=8,
                         help='')
+    parser.add_argument('--region-size',
+                        type=int,
+                        default=30,
+                        help='')
     parser.add_argument('--begin', 
                         type=int, default=0,
                         help='')
@@ -187,7 +191,7 @@ def main(args):
         image = cv2.imread(image_path)
         image = cv2.resize(image, (224, 224))
         
-        element_sets_V = SubRegionDivision(image, mode=args.superpixel_algorithm)
+        element_sets_V = SubRegionDivision(image, mode=args.superpixel_algorithm, region_size = args.region_size)
         smdl.k = len(element_sets_V)
 
         # start = time.time()

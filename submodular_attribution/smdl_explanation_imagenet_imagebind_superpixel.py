@@ -70,13 +70,13 @@ def parse_args():
                         choices=["slico", "seeds"],
                         help="")
     parser.add_argument('--lambda1', 
-                        type=float, default=0.,
+                        type=float, default=0.01,
                         help='')
     parser.add_argument('--lambda2', 
-                        type=float, default=1.,
+                        type=float, default=0.05,
                         help='')
     parser.add_argument('--lambda3', 
-                        type=float, default=1.,
+                        type=float, default=20.,
                         help='')
     parser.add_argument('--lambda4', 
                         type=float, default=10.,

@@ -16,10 +16,10 @@ import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/imagenet-clip-vitl-false/ViT-CX"
+explanation_method = "explanation_results/imagenet-clip-vitl-true/IGOS++"
 image_root_path = "datasets/imagenet/ILSVRC2012_img_val"
-eval_list = "datasets/imagenet/val_clip_vitl_2k_false.txt"
-save_doc = "imagenet-fair-clip-vitl"
+eval_list = "datasets/imagenet/val_clip_vitl_5k_true.txt"
+save_doc = "imagenet-true-clip-vitl"
 steps = 50
 batch_size = 10
 image_size_ = 224
@@ -98,7 +98,7 @@ def perturbed(image, mask, rate = 0.5, mode = "insertion"):
     return perturbed_image.astype(np.uint8)
 
 def main():
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = "cuda:1" if torch.cuda.is_available() else "cpu"
     
     mkdir(results_save_root)
     save_dir = os.path.join(results_save_root, save_doc)
@@ -120,7 +120,7 @@ def main():
     with open(eval_list, "r") as f:
         infos = f.read().split('\n')
 
-    for info in tqdm(infos):
+    for info in tqdm(infos[:17]):
         json_file = {}
         class_index = int(info.split(" ")[-1])
         image_path = os.path.join(image_root_path, info.split(" ")[0])

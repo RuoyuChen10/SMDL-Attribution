@@ -11,6 +11,7 @@
 
 ## 📰 News & Update
 
+- **[2024.08.22]** Our approach now supports audio attribtuon on foundation model, we use ImageBind as an example! Welcome to try it according to the [tutorial](./tutorial/tutorial-vggsound_attribution.ipynb)!
 - **[2024.06.16]** Our approach now supports medical multimodal model [Quilt](https://github.com/wisdomikezogwo/quilt1m/) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-quilt.ipynb)!
 - **[2024.06.04]** Our approach now supports `multi-gpus` interpretation proccessing, please refer to the [./scripts](./scripts) fold!
 - **[2024.06.04]** Our approach now supports [CLIP](https://github.com/openai/CLIP) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-clip-vitl.ipynb)!
@@ -74,6 +75,10 @@ Uncertainty Estimation Models (Please download and put the models to the path `c
 | SEEDS | ![](image/seeds.png) | 0.7262 | 0.9918 | 0.8862 |
 | Prior Saliency Map + Patch | ![](image/prior_saliency_division.png) | 0.7262 | 0.9710 | 0.7236 |
 | Segment Anything Model | ![](image/sam.png) | 0.7262 | 0.9523 | 0.6803 |
+
+Audio classification (on multimodal foundation model ImageBind) attribution:
+
+![](image/sound.png)
 
 Medical multimodal model debugging:
 

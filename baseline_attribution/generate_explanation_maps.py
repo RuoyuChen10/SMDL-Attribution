@@ -30,7 +30,7 @@ SAVE_PATH = "explanation_results/"
 mkdir(SAVE_PATH)
 
 mode = "CUB"
-net_mode  = "mobilenetv2" # "resnet", vgg
+net_mode  = "resnet" # "resnet", vgg
 
 if mode == "Celeb-A":
     keras_model_path = "ckpt/keras_model/keras-ArcFace-R100-Celeb-A.h5"

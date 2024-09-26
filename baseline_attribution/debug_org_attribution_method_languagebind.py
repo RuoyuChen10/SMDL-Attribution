@@ -16,10 +16,10 @@ import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/imagenet-languagebind-false/ViT-CX"
+explanation_method = "explanation_results/imagenet-languagebind-true/HsicAttributionMethod"
 image_root_path = "datasets/imagenet/ILSVRC2012_img_val"
-eval_list = "datasets/imagenet/val_languagebind_2k_false.txt"
-save_doc = "imagenet-fair-languagebind"
+eval_list = "datasets/imagenet/val_languagebind_5k_true.txt"
+save_doc = "imagenet-true-languagebind"
 steps = 50
 batch_size = 10
 image_size_ = 224

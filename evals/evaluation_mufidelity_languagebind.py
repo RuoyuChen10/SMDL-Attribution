@@ -69,7 +69,7 @@ def parse_args():
                         help='Datasets.')
     parser.add_argument('--eval-number',
                         type=int,
-                        default=-1,
+                        default=1000,
                         help='Datasets.')
     parser.add_argument('--explanation-smdl', 
                         type=str, 
@@ -88,30 +88,30 @@ class LanguageBindModel_Super(torch.nn.Module):
         self.tokenizer = LanguageBindImageTokenizer.from_pretrained(
             pretrained_ckpt, cache_dir='.checkpoints/tokenizer_cache_dir')
         
-        self.clip_type = ["video", "audio", "thermal", "image", "depth"]
+        self.clip_type = ["video"]
         self.modality_transform = {c: transform_dict[c](self.base_model.modality_config[c]) for c in self.clip_type}
     
-    def mode_selection(self, mode):
-        if mode not in ["image", "audio", "video", "depth", "thermal", "language"]:
-            print("mode {} does not comply with the specification, please select from \"image\", \"audio\", \"video\", \"depth\", \"thermal\", \"language\".".format(mode))
-        else:
-            self.mode = mode
-            print("Select mode {}".format(mode))
+    # def mode_selection(self, mode):
+    #     if mode not in ["image", "audio", "video", "depth", "thermal", "language"]:
+    #         print("mode {} does not comply with the specification, please select from \"image\", \"audio\", \"video\", \"depth\", \"thermal\", \"language\".".format(mode))
+    #     else:
+    #         self.mode = mode
+    #         print("Select mode {}".format(mode))
     
-    def equip_semantic_modal(self, modal_list):
-        if self.mode == "language":
-            self.semantic_modal = to_device(self.tokenizer(modal_list, max_length=77, padding='max_length',
-                                             truncation=True, return_tensors='pt'), self.device)
-        elif self.mode in self.clip_type:
-            self.semantic_modal = to_device(self.modality_transform[self.mode](modal_list), self.device)
+    # def equip_semantic_modal(self, modal_list):
+    #     if self.mode == "language":
+    #         self.semantic_modal = to_device(self.tokenizer(modal_list, max_length=77, padding='max_length',
+    #                                          truncation=True, return_tensors='pt'), self.device)
+    #     elif self.mode in self.clip_type:
+    #         self.semantic_modal = to_device(self.modality_transform[self.mode](modal_list), self.device)
         
-        input = {
-                # "vision": vision_inputs,
-                self.mode: self.semantic_modal
-            }
-        with torch.no_grad():
-            self.semantic_modal = self.base_model(input)[self.mode]
-        print("Equip with {} modal.".format(self.mode))
+    #     input = {
+    #             # "vision": vision_inputs,
+    #             self.mode: self.semantic_modal
+    #         }
+    #     with torch.no_grad():
+    #         self.semantic_modal = self.base_model(input)[self.mode]
+    #     print("Equip with {} modal.".format(self.mode))
     
     def forward(self, vision_inputs):
         """
@@ -158,8 +158,8 @@ def convert_smdl_mask(smdl_mask):
         for i in range(length):
             single_mask[smdl_single_mask[i]>0] = length - i
         
-        single_mask = cv2.resize(single_mask, (7,7))    # for smooth
-        single_mask = cv2.resize(single_mask, (224,224))
+        # single_mask = cv2.resize(single_mask, (7,7))    # for smooth
+        # single_mask = cv2.resize(single_mask, (224,224))
         # single_mask = np.exp(single_mask / single_mask.max() / 0.02)
         
         batch_mask.append(single_mask.astype(np.float32))
@@ -198,10 +198,10 @@ def main(args):
     # Load model
     clip_type = {
         'video': 'LanguageBind_Video_FT',  # also LanguageBind_Video
-        'audio': 'LanguageBind_Audio_FT',  # also LanguageBind_Audio
-        'thermal': 'LanguageBind_Thermal',
-        'image': 'LanguageBind_Image',
-        'depth': 'LanguageBind_Depth',
+        # 'audio': 'LanguageBind_Audio_FT',  # also LanguageBind_Audio
+        # 'thermal': 'LanguageBind_Thermal',
+        # 'image': 'LanguageBind_Image',
+        # 'depth': 'LanguageBind_Depth',
     }
     torch_model = LanguageBind(clip_type=clip_type, cache_dir='.checkpoints')
     torch_model.eval()
@@ -221,7 +221,7 @@ def main(args):
     torch.cuda.empty_cache()
 
     # original
-    metric = MuFidelity(model, input_image, label_onehot, batch_size=32, nb_samples=32, grid_size=10)
+    metric = MuFidelity(model, input_image, label_onehot, batch_size=32, nb_samples=32, grid_size=7)
 
     batch_mask = convert_smdl_mask(smdl_mask)
     mufidelity_score = metric(batch_mask)

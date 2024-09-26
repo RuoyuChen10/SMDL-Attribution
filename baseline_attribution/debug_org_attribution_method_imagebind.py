@@ -18,7 +18,7 @@ import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/imagenet-imagebind-false/ViT-CX"
+explanation_method = "explanation_results/imagenet-imagebind-false/HsicAttributionMethod"
 image_root_path = "datasets/imagenet/ILSVRC2012_img_val"
 eval_list = "datasets/imagenet/val_imagebind_2k_false.txt"
 save_doc = "imagenet-fair-imagebind"

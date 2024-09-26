@@ -38,11 +38,11 @@ def parse_args():
                         help='Datasets.')
     parser.add_argument('--eval-list',
                         type=str,
-                        default='datasets/CUB/eval_fair-mobilenetv2.txt',
+                        default='datasets/CUB/eval_fair-resnet.txt',
                         help='Datasets.')
     parser.add_argument('--sam-mask-dir',
                         type=str,
-                        default="SAM_mask/CUB-mobilenetv2",
+                        default="SAM_mask/CUB-resnet",
                         help="")
     parser.add_argument('--lambda1', 
                         type=float, default=1.,
@@ -58,10 +58,10 @@ def parse_args():
                         help='')
     parser.add_argument('--cfg', 
                         type=str, 
-                        default="configs/cub/submodular_cfg_cub_tf-mobilenetv2.json",
+                        default="configs/cub/submodular_cfg_cub_tf-resnet-v2.json",
                         help='')
     parser.add_argument('--save-dir', 
-                        type=str, default='./submodular_results/cub-fair-mobilenetv2',
+                        type=str, default='./submodular_results/cub-fair-resnet',
                         help='output directory to save results')
     args = parser.parse_args()
     return args

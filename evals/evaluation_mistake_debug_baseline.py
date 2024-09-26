@@ -5,8 +5,8 @@ from tqdm import tqdm
 import numpy as np
 
 
-explanation_method = "explanation_insertion_results/lung-fair-quilt/KernelShap"
-eval_list = "datasets/medical_lung/LC25000_lung_quilt_1k_false.txt"
+explanation_method = "explanation_insertion_results/imagenet-fair-clip-vitl/GradECLIP"
+eval_list = "datasets/imagenet/val_clip_vitl_2k_false.txt"
 # steps = 49
 # percentage = 0.25
 # number = int(percentage * steps)

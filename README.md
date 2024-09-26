@@ -2,12 +2,23 @@
 <h5 align="center"> If you like our project, please give us a star ⭐ on GitHub for latest update.  </h2>
 
 [![arXiv](https://img.shields.io/badge/Arxiv-2402.09164-b31b1b.svg?logo=arXiv)](https://arxiv.org/abs/2402.09164)
+[![hf_space](https://img.shields.io/badge/🤗-Open%20In%20Spaces-blue.svg)](https://huggingface.co/spaces/RuoyuChen/SMDL-Attribution)
 ![Python 3.8](https://img.shields.io/badge/python-3.8-green.svg?style=plastic)
 ![Pytorch 1.12.1](https://img.shields.io/badge/pytorch-1.12.1-green.svg?style=plastic)
-<!-- ![TensorFlow 2.12.0](https://img.shields.io/badge/tensorflow-2.12.0-green.svg?style=plastic) -->
 ![License CC BY-NC](https://img.shields.io/badge/license-Apache_2.0-green.svg?style=plastic)
 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/less-is-more-fewer-interpretable-region-via/image-attribution-on-celeba)](https://paperswithcode.com/sota/image-attribution-on-celeba?p=less-is-more-fewer-interpretable-region-via)
+
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/less-is-more-fewer-interpretable-region-via/error-understanding-on-cub-200-2011-1)](https://paperswithcode.com/sota/error-understanding-on-cub-200-2011-1?p=less-is-more-fewer-interpretable-region-via)
+
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/less-is-more-fewer-interpretable-region-via/image-attribution-on-cub-200-2011-1)](https://paperswithcode.com/sota/image-attribution-on-cub-200-2011-1?p=less-is-more-fewer-interpretable-region-via)
+
+	
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/less-is-more-fewer-interpretable-region-via/image-attribution-on-vggface2)](https://paperswithcode.com/sota/image-attribution-on-vggface2?p=less-is-more-fewer-interpretable-region-via)
+
 ![](./image/abstract.gif)
+
 
 ## 📰 News & Update
 

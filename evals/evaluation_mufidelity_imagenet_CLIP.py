@@ -73,7 +73,7 @@ def parse_args():
                         help='Datasets.')
     parser.add_argument('--explanation-smdl', 
                         type=str, 
-                        default='./submodular_results/imagenet-clip-vitl-efficientv1/slico-0.0-0.05-1.0-1.0/npy',
+                        default='./submodular_results/imagenet-clip-vitl-efficientv2/slico-0.0-0.05-1.0-1.0-pending-samples-8/npy',
                         # default='./submodular_results/celeba/random_patch-7x7-48/npy',
                         help='output directory to save results')
     args = parser.parse_args()
@@ -112,8 +112,8 @@ def convert_smdl_mask(smdl_mask):
         for i in range(length):
             single_mask[smdl_single_mask[i]>0] = length - i
         
-        single_mask = cv2.resize(single_mask, (7,7))    # for smooth
-        single_mask = cv2.resize(single_mask, (224,224))
+        # single_mask = cv2.resize(single_mask, (7,7))    # for smooth
+        # single_mask = cv2.resize(single_mask, (224,224))
         # single_mask = np.exp(single_mask / single_mask.max() / 0.5)
         
         batch_mask.append(single_mask.astype(np.float32))
@@ -160,10 +160,10 @@ def main(args):
     torch.cuda.empty_cache()
 
     # original
-    metric = MuFidelity(model, input_image, label_onehot, batch_size=32, nb_samples=32, grid_size=10)
+    metric = MuFidelity(model, input_image, label_onehot, batch_size=32, nb_samples=32, grid_size=7)
     
     batch_mask = convert_smdl_mask(smdl_mask)
-    mufidelity_score = metric(batch_mask)
+    mufidelity_score = metric(batch_mask.astype(np.float32))
     print("Our Method MuFidelity Score: {}".format(mufidelity_score))
     return 
 

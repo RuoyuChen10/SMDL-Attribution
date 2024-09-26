@@ -24,15 +24,15 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Segment Anything')
     parser.add_argument('--image-dir', 
                         type=str, 
-                        default='./datasets/imagenet/ILSVRC2012_img_val',
+                        default='./datasets/CUB/test',
                         help='')
     parser.add_argument('--image-file', 
                         type=str, 
-                        default='./datasets/imagenet/val_clip_rn101_5k_true.txt',
+                        default='./datasets/CUB/eval_fair-resnet.txt',
                         help='')
     parser.add_argument('--save-dir', 
                         type=str, 
-                        default='./SAM_mask/imagenet',
+                        default='./SAM_mask/CUB-resnet',
                         help='')
     args = parser.parse_args()
     return args

@@ -87,20 +87,27 @@ def main(args):
     mkdir("SAM_mask")
     mkdir(args.save_dir)
     print("Begin Inference")
-    for image_path, y_label in zip(input_data, label):
-        try:
-            if os.path.exists(os.path.join(args.save_dir, image_path.replace(".jpg", ".npy").replace(".JPEG", ".npy"))):
-                continue
+    # for image_path, y_label in zip(input_data, label):
+    #     try:
+    #         if os.path.exists(os.path.join(args.save_dir, image_path.replace(".jpg", ".npy").replace(".JPEG", ".npy"))):
+    #             continue
             
-            image = cv2.imread(os.path.join(args.image_dir, image_path))
+    #         image = cv2.imread(os.path.join(args.image_dir, image_path))
 
-            masks = mask_generator.generate(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-            element_sets_V = processing_sam_concepts(masks, image)
+    #         masks = mask_generator.generate(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    #         element_sets_V = processing_sam_concepts(masks, image)
 
-            # mkdir(os.path.join(args.save_dir, str(y_label)))
-            np.save(os.path.join(args.save_dir, image_path.replace(".jpg", "").replace(".JPEG", "")), np.array(element_sets_V))
-        except:
-            print("Image {} need larger CUDA.".format(image_path))
+    #         # mkdir(os.path.join(args.save_dir, str(y_label)))
+    #         np.save(os.path.join(args.save_dir, image_path.replace(".jpg", "").replace(".JPEG", "")), np.array(element_sets_V))
+    #     except:
+    #         print("Image {} need larger CUDA.".format(image_path))
+    
+    image_path = "datasets/imagenet/ILSVRC2012_img_val/ILSVRC2012_val_00034333.JPEG"
+    image = cv2.imread(image_path)
+    masks = mask_generator.generate(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    element_sets_V = processing_sam_concepts(masks, image)
+    np.save("SAM_mask/imagenet/ILSVRC2012_val_00034333", np.array(element_sets_V))
+    
     return
 
 if __name__ == "__main__":

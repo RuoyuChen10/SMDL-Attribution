@@ -18,10 +18,10 @@ import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/imagenet-imagebind-false/HsicAttributionMethod"
+explanation_method = "explanation_results/imagenet-imagebind-true/ViT-CX"
 image_root_path = "datasets/imagenet/ILSVRC2012_img_val"
-eval_list = "datasets/imagenet/val_imagebind_2k_false.txt"
-save_doc = "imagenet-fair-imagebind"
+eval_list = "datasets/imagenet/val_imagebind_5k_true.txt"
+save_doc = "imagenet-true-imagebind"
 steps = 50
 batch_size = 10
 image_size_ = 224
@@ -141,6 +141,8 @@ def main():
     for info in tqdm(infos):
         json_file = {}
         class_index = int(info.split(" ")[-1])
+        if class_index!=129:
+            continue
         image_path = os.path.join(image_root_path, info.split(" ")[0])
 
         mask_path = os.path.join(explanation_method, info.split(" ")[0].replace(".JPEG", ".npy"))

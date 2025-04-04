@@ -5,24 +5,30 @@ import matplotlib
 from matplotlib import pyplot as plt
 
 from keras.models import load_model
-# from keras.applications.resnet import (
-#     preprocess_input)
+
 # from keras.applications.efficientnet_v2 import preprocess_input
 # from keras.applications.mobilenet_v2 import preprocess_input
-from keras.applications.vgg19 import preprocess_input
+# from keras.applications.vgg19 import preprocess_input
 
 from tqdm import tqdm
 import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/cub-vgg19/ScoreCAM"
+explanation_method = "explanation_results/cub-resnet/KernelShap"
 image_root_path = "datasets/CUB/test/"
-keras_model_path = "ckpt/keras_model/cub-vgg19.h5"
-eval_list = "datasets/CUB/eval_fair-vgg19.txt"
-save_doc = "cub-fair-vgg19"
-steps = 25
-image_size_ = 224
+if "resnet" in explanation_method:
+    from keras.applications.resnet import (preprocess_input)
+    keras_model_path = "ckpt/keras_model/cub-resnet101-new.h5"
+
+eval_list = "datasets/CUB/eval_fair-resnet.txt"
+save_doc = "cub-fair-resnet"
+steps = 50
+
+if "efficientnet" in save_doc:
+    image_size_ = 384
+else:
+    image_size_ = 224
 
 def perturbed(image, mask, rate = 0.5, mode = "insertion"):
     mask_flatten = mask.flatten()

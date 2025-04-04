@@ -22,6 +22,7 @@
 
 ## 📰 News & Update
 
+- **[2025.04.02]** A general, fully updated version of efficient black-box attribution has been released in our latest paper: https://arxiv.org/abs/2504.00470.
 - **[2024.08.22]** Our approach now supports audio attribtuon on foundation model, we use ImageBind as an example! Welcome to try it according to the [tutorial](./tutorial/tutorial-vggsound_attribution.ipynb)!
 - **[2024.06.16]** Our approach now supports medical multimodal model [Quilt](https://github.com/wisdomikezogwo/quilt1m/) interpretation! Welcome to try it according to the [tutorial](./tutorial/tutorial-submodular-quilt.ipynb)!
 - **[2024.06.04]** Our approach now supports `multi-gpus` interpretation proccessing, please refer to the [./scripts](./scripts) fold!

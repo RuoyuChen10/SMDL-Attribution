@@ -50,7 +50,7 @@ def main(args):
             npy_file_path = os.path.join(npy_id_files_path, json_file_name.replace(".json", ".npy"))
 
             with open(json_file_path, 'r', encoding='utf-8') as f:
-                saved_json_file = json.load(f)            
+                saved_json_file = json.load(f)
             submodular_image_set = np.load(npy_file_path)
 
             insertion_area = []

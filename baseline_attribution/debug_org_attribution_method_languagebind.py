@@ -16,7 +16,7 @@ import json
 from utils import *
 
 results_save_root = "./explanation_insertion_results"
-explanation_method = "explanation_results/imagenet-languagebind-true/HsicAttributionMethod"
+explanation_method = "explanation_results/imagenet-languagebind-true/ViT-CX"
 image_root_path = "datasets/imagenet/ILSVRC2012_img_val"
 eval_list = "datasets/imagenet/val_languagebind_5k_true.txt"
 save_doc = "imagenet-true-languagebind"
@@ -161,6 +161,13 @@ def main():
     for info in tqdm(infos):
         json_file = {}
         class_index = int(info.split(" ")[-1])
+        
+        if "ILSVRC2012_val_00020699" not in info:
+            continue
+        
+        # if class_index!=351:
+        #     continue
+        
         image_path = os.path.join(image_root_path, info.split(" ")[0])
 
         mask_path = os.path.join(explanation_method, info.split(" ")[0].replace(".JPEG", ".npy"))

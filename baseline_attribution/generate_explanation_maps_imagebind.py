@@ -34,11 +34,11 @@ from utils import *
 
 tf.config.run_functions_eagerly(True)
 
-gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
-tf.config.experimental.set_virtual_device_configuration(
-    gpus[0],
-    [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=2048)]
-)
+# gpus = tf.config.experimental.list_physical_devices(device_type='GPU')
+# tf.config.experimental.set_virtual_device_configuration(
+#     gpus[0],
+#     [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=2048)]
+# )
 
 data_transform = transforms.Compose(
         [
@@ -174,7 +174,7 @@ def main():
     
     # define explainers
     explainers = [
-        # Saliency(model),
+        Saliency(wrapped_model,batch_size = 16),
         # GradientInput(model),
         # GuidedBackprop(model),
         # IntegratedGradients(wrapped_model, steps=80, batch_size=batch_size),
@@ -189,7 +189,7 @@ def main():
         # HsicAttributionMethod(wrapped_model, batch_size=batch_size),
         # Rise(wrapped_model, nb_samples=500, batch_size=batch_size),
         # Lime(model, nb_samples = 1000),
-        KernelShap(wrapped_model, nb_samples = 1000, batch_size=batch_size)
+        # KernelShap(wrapped_model, nb_samples = 1000, batch_size=batch_size)
     ]
     
     # data preproccess

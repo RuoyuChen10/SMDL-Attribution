@@ -5,8 +5,8 @@ from tqdm import tqdm
 import numpy as np
 
 
-explanation_method = "explanation_insertion_results/imagenet-fair-clip-vitl/GradECLIP"
-eval_list = "datasets/imagenet/val_clip_vitl_2k_false.txt"
+explanation_method = "explanation_insertion_results/cub-fair-efficientnet/KernelShap"
+eval_list = "datasets/CUB/eval_fair-efficientnet.txt"
 # steps = 49
 # percentage = 0.25
 # number = int(percentage * steps)
@@ -20,15 +20,20 @@ def main(percentage):
     region_area = []
 
     for info in tqdm(infos[:]):
+        # if "CUB" in eval_list:
+        #     json_file_path = os.path.join(explanation_method, info.split(" ")[0].split("/")[-1].replace(".jpg", ".json").replace(".JPEG", ".json").replace(".jpeg", ".json"))
+        # else:
         json_file_path = os.path.join(explanation_method, info.split(" ")[0].replace(".jpg", ".json").replace(".JPEG", ".json").replace(".jpeg", ".json"))
 
+        
+        
         with open(json_file_path, 'r', encoding='utf-8') as f:
             f_data = json.load(f)
         
-        steps = len(f_data["consistency_score"])
+        steps = len(f_data["recognition_score"])
         number = int(percentage * steps)
         
-        data = f_data["consistency_score"][:number]
+        data = f_data["recognition_score"][:number]
 
         highest_conf = max(data)
         highest_acc.append(highest_conf)

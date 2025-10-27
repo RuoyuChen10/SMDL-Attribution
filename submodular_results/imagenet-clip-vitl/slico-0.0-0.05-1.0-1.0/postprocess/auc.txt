@@ -1,9 +1,0 @@
-R:\--Research-Code\SMDL-Attribution\submodular_results\imagenet-clip-vitl\slico-0.0-0.05-1.0-1.0
-Insertion AUC Score: 0.0010
-Deletion AUC Score: 0.0010
-
-[stderr]
-
-  0%|          | 0/1 [00:00<?, ?it/s]
-100%|██████████| 1/1 [00:00<00:00,  2.57it/s]
-100%|██████████| 1/1 [00:00<00:00,  2.57it/s]

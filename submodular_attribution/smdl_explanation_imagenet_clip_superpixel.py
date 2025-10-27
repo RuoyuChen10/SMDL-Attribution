@@ -21,7 +21,7 @@ import subprocess
 from scipy.ndimage import gaussian_filter
 import matplotlib
 from matplotlib import pyplot as plt
-plt.style.use('seaborn')
+plt.style.use('default')
 
 from tqdm import tqdm
 from utils import *
@@ -131,6 +131,9 @@ def main(args):
     vis_model.eval()
     vis_model.to(device)
     print("load CLIP model")
+
+    #默认值，避免未定义
+    semantic_feature = None
     
     semantic_path = "ckpt/semantic_features/clip_vitl_imagenet_zeroweights.pt"
     if os.path.exists(semantic_path):
@@ -144,7 +147,7 @@ def main(args):
         lambda3=args.lambda3, 
         lambda4=args.lambda4)
     
-    with open(args.eval_list, "r") as f:
+    with open(args.eval_list, "r", encoding="utf-8") as f:
         infos = f.read().split('\n')
     
     mkdir(args.save_dir)
@@ -160,13 +163,20 @@ def main(args):
     
     select_infos = infos[args.begin : args.end]
     for info in tqdm(select_infos):
-        gt_id = info.split(" ")[1]
+        info = info.strip()
+        if not info:
+            continue
+        try:
+            image_relative_path, gt_id = info.rsplit(" ", 1)  # 只从右侧分一次
+        except ValueError:
+            continue  # 跳过不合法行
         
-        image_relative_path = info.split(" ")[0]
-        
+        base, ext = os.path.splitext(image_relative_path)
+        json_name = base + ".json"
+        npy_name  = base + ".npy"
+
         if os.path.exists(
-            os.path.join(
-            os.path.join(save_json_root_path, gt_id), image_relative_path.replace(".JPEG", ".json"))
+            os.path.join(save_json_root_path, gt_id, json_name)
         ):
             continue
         
@@ -174,8 +184,18 @@ def main(args):
         gt_label = int(gt_id)
         
         # Read original image
-        image_path = os.path.join(args.Datasets, image_relative_path)
-        image = cv2.imread(image_path)
+        image_path = os.path.normpath(os.path.join(args.Datasets, image_relative_path))
+        if not os.path.exists(image_path):
+            print(f"[skip] file not found: {image_path}")
+            continue
+
+        # 更稳的中文/空格路径读法
+        data = np.fromfile(image_path, dtype=np.uint8)
+        image = cv2.imdecode(data, cv2.IMREAD_COLOR)
+        if image is None:
+            print(f"[skip] failed to read: {image_path}")
+            continue
+
         image = cv2.resize(image, (224, 224))
         
         element_sets_V = SubRegionDivision(image, mode=args.superpixel_algorithm)
@@ -194,18 +214,16 @@ def main(args):
         #     save_image_root_path, image_relative_path)
         # cv2.imwrite(save_image_path, submodular_image)
 
-        # Save npy file
+        # 保存 npy
         mkdir(os.path.join(save_npy_root_path, gt_id))
         np.save(
-            os.path.join(
-                os.path.join(save_npy_root_path, gt_id), image_relative_path.replace(".JPEG", ".npy")),
+            os.path.join(save_npy_root_path, gt_id, npy_name),
             np.array(submodular_image_set)
         )
 
-        # Save json file
+        # 保存 json
         mkdir(os.path.join(save_json_root_path, gt_id))
-        with open(os.path.join(
-            os.path.join(save_json_root_path, gt_id), image_relative_path.replace(".JPEG", ".json")), "w") as f:
+        with open(os.path.join(save_json_root_path, gt_id, json_name), "w", encoding="utf-8") as f:
             f.write(json.dumps(saved_json_file, ensure_ascii=False, indent=4, separators=(',', ':')))
 
     #     # Save GIF
